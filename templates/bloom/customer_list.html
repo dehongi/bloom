@@ -1,0 +1,136 @@
+{% extends 'bloom/base.html' %}
+{% load static %}
+
+{% block bloom_content %}
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="card-title mb-0"><i class="bi bi-people me-2"></i>Customers</h3>
+            <a href="{% url 'bloom:customer_create' %}" class="btn btn-primary"><i class="bi bi-person-plus me-1"></i>New Customer</a>
+          </div>
+
+          <!-- Search Form -->
+          <form method="get" class="mb-4">
+            <div class="row g-3">
+              <div class="col-md-10">
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-search"></i></span>
+                  <input type="text" name="search" class="form-control" placeholder="Search by name, email or phone..." value="{{ search_term }}" />
+                </div>
+              </div>
+              <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Search</button>
+              </div>
+            </div>
+          </form>
+
+          <!-- Customers Table -->
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Location</th>
+                  <th>Orders</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for customer in customers %}
+                  <tr>
+                    <td>
+                      <a href="{% url 'bloom:customer_detail' customer.pk %}">{{ customer.name }}</a>
+                    </td>
+                    <td>{{ customer.email }}</td>
+                    <td>{{ customer.phone }}</td>
+                    <td>{{ customer.city }}, {{ customer.state }}, {{ customer.country }}</td>
+                    <td>
+                      {% with order_count=customer.order_set.count %}
+                        {% if order_count > 0 %}
+                          <span class="badge bg-primary rounded-pill">{{ order_count }}</span>
+                        {% else %}
+                          <span class="badge bg-secondary rounded-pill">0</span>
+                        {% endif %}
+                      {% endwith %}
+                    </td>
+                    <td>
+                      <div class="btn-group btn-group-sm">
+                        <a href="{% url 'bloom:customer_detail' customer.pk %}" class="btn btn-outline-primary" title="View"><i class="bi bi-eye"></i></a>
+                        <a href="{% url 'bloom:customer_update' customer.pk %}" class="btn btn-outline-secondary" title="Edit"><i class="bi bi-pencil"></i></a>
+                        <a href="{% url 'bloom:customer_delete' customer.pk %}" class="btn btn-outline-danger delete-confirm-btn" title="Delete"><i class="bi bi-trash"></i></a>
+                      </div>
+                    </td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="6" class="text-center py-4">
+                      <div class="text-muted">
+                        <i class="bi bi-people fs-1 d-block mb-2"></i>
+                        <p>
+                          No customers found. <a href="{% url 'bloom:customer_create' %}">Add a new customer</a>.
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          {% if is_paginated %}
+            <nav aria-label="Page navigation" class="mt-4">
+              <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                  <li class="page-item">
+                    <a class="page-link"
+                      href="?page=1{% if search_term %}
+                        &search={{ search_term }}
+                      {% endif %}">
+                      &laquo; First
+                    </a>
+                  </li>
+                  <li class="page-item">
+                    <a class="page-link"
+                      href="?page={{ page_obj.previous_page_number }}{% if search_term %}
+                        &search={{ search_term }}
+                      {% endif %}">
+                      Previous
+                    </a>
+                  </li>
+                {% endif %}
+
+                <li class="page-item disabled">
+                  <a class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</a>
+                </li>
+
+                {% if page_obj.has_next %}
+                  <li class="page-item">
+                    <a class="page-link"
+                      href="?page={{ page_obj.next_page_number }}{% if search_term %}
+                        &search={{ search_term }}
+                      {% endif %}">
+                      Next
+                    </a>
+                  </li>
+                  <li class="page-item">
+                    <a class="page-link"
+                      href="?page={{ page_obj.paginator.num_pages }}{% if search_term %}
+                        &search={{ search_term }}
+                      {% endif %}">
+                      Last &raquo;
+                    </a>
+                  </li>
+                {% endif %}
+              </ul>
+            </nav>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

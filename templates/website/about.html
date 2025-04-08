@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  About Bloom Floral & Gifts
+{% endblock %}
+
+{% block content %}
+  <div class="container py-5">
+    <div class="row">
+      <div class="col-lg-8 mx-auto">
+        <div class="card shadow">
+          <div class="card-body p-4 p-lg-5">
+            <h1 class="display-5 mb-4">About Bloom</h1>
+
+            <p class="lead mb-4">Creating beautiful moments with flowers and exceptional gifts since 2010.</p>
+
+            <div class="text-center mb-5">
+              <img src="https://images.unsplash.com/photo-1561729098-cbf2f5240360?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mzd8fGZsb3dlciUyMHNob3B8ZW58MHx8MHx8&auto=format&fit=crop&w=800&q=60" alt="Bloom Flower Shop" class="img-fluid rounded-3 shadow" style="max-height: 400px;" />
+            </div>
+
+            <h2 class="h4 mt-5 mb-3">Our Story</h2>
+            <p>Bloom began as a small family-owned flower stall with a simple mission: to share the joy of beautiful flowers with our community. Over the years, we've grown into a full-service floral and gift shop, but our commitment to quality, creativity, and customer satisfaction remains at the heart of everything we do.</p>
+            <p>We believe that flowers have the remarkable ability to express emotions, celebrate milestones, and create lasting memories. Every arrangement we create is crafted with care, creativity, and attention to detail to ensure it perfectly conveys your sentiment.</p>
+
+            <h2 class="h4 mt-5 mb-3">What We Offer</h2>
+            <div class="row">
+              <div class="col-md-6 mb-4">
+                <div class="d-flex">
+                  <div class="flex-shrink-0">
+                    <i class="bi bi-flower1 text-primary fs-3 me-3"></i>
+                  </div>
+                  <div>
+                    <h3 class="h5">Fresh Flower Arrangements</h3>
+                    <p>Hand-selected blooms arranged with artistic flair for any occasion.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 mb-4">
+                <div class="d-flex">
+                  <div class="flex-shrink-0">
+                    <i class="bi bi-gift text-primary fs-3 me-3"></i>
+                  </div>
+                  <div>
+                    <h3 class="h5">Thoughtful Gifts</h3>
+                    <p>Curated gift collections that perfectly complement our floral designs.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 mb-4">
+                <div class="d-flex">
+                  <div class="flex-shrink-0">
+                    <i class="bi bi-calendar-event text-primary fs-3 me-3"></i>
+                  </div>
+                  <div>
+                    <h3 class="h5">Event Florals</h3>
+                    <p>Stunning floral designs for weddings, corporate events, and special celebrations.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 mb-4">
+                <div class="d-flex">
+                  <div class="flex-shrink-0">
+                    <i class="bi bi-truck text-primary fs-3 me-3"></i>
+                  </div>
+                  <div>
+                    <h3 class="h5">Reliable Delivery</h3>
+                    <p>Prompt and careful delivery to ensure your gifts arrive in perfect condition.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <h2 class="h4 mt-5 mb-3">Our Commitment</h2>
+            <p>At Bloom, we're committed to:</p>
+            <ul>
+              <li>
+                <strong>Quality:</strong> Using only the freshest, highest-quality flowers and materials
+              </li>
+              <li>
+                <strong>Creativity:</strong> Creating unique designs that reflect your personal style and sentiment
+              </li>
+              <li>
+                <strong>Sustainability:</strong> Implementing eco-friendly practices in our operations
+              </li>
+              <li>
+                <strong>Community:</strong> Supporting local growers and giving back to our community
+              </li>
+              <li>
+                <strong>Service:</strong> Providing exceptional customer service at every step
+              </li>
+            </ul>
+
+            <h2 class="h4 mt-5 mb-3">Meet Our Team</h2>
+            <p>Our team of passionate floral designers combines technical expertise with artistic vision to create arrangements that delight and inspire. Each team member brings unique skills and perspectives to our work, ensuring a diverse and innovative range of designs.</p>
+            <p>We love what we do, and we think it shows in our work!</p>
+
+            <div class="mt-5 text-center">
+              <a href="{% url 'website:contact' %}" class="btn btn-primary btn-lg"><i class="bi bi-envelope me-2"></i>Get in Touch</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

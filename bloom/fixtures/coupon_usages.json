@@ -1,0 +1,52 @@
+[
+    {
+        "model": "shop.couponusage",
+        "pk": 1,
+        "fields": {
+            "coupon": 4,
+            "user": 1,
+            "order": 1,
+            "used_at": "2023-03-15T14:30:00Z"
+        }
+    },
+    {
+        "model": "shop.couponusage",
+        "pk": 2,
+        "fields": {
+            "coupon": 2,
+            "user": 2,
+            "order": 2,
+            "used_at": "2023-06-22T09:45:00Z"
+        }
+    },
+    {
+        "model": "shop.couponusage",
+        "pk": 3,
+        "fields": {
+            "coupon": 3,
+            "user": 1,
+            "order": 3,
+            "used_at": "2023-07-10T16:20:00Z"
+        }
+    },
+    {
+        "model": "shop.couponusage",
+        "pk": 4,
+        "fields": {
+            "coupon": 2,
+            "user": 3,
+            "order": 4,
+            "used_at": "2023-07-15T11:30:00Z"
+        }
+    },
+    {
+        "model": "shop.couponusage",
+        "pk": 5,
+        "fields": {
+            "coupon": 7,
+            "user": 2,
+            "order": 5,
+            "used_at": "2023-09-05T19:15:00Z"
+        }
+    }
+]

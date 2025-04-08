@@ -1,0 +1,138 @@
+[
+    {
+        "model": "bloom.product_occasions",
+        "pk": 1,
+        "fields": {
+            "product": 1,
+            "occasion": 1
+        }
+    },
+    {
+        "model": "bloom.product_occasions",
+        "pk": 2,
+        "fields": {
+            "product": 1,
+            "occasion": 2
+        }
+    },
+    {
+        "model": "bloom.product_occasions",
+        "pk": 3,
+        "fields": {
+            "product": 1,
+            "occasion": 3
+        }
+    },
+    {
+        "model": "bloom.product_occasions",
+        "pk": 4,
+        "fields": {
+            "product": 1,
+            "occasion": 5
+        }
+    },
+    {
+        "model": "bloom.product_occasions",
+        "pk": 5,
+        "fields": {
+            "product": 2,
+            "occasion": 1
+        }
+    },
+    {
+        "model": "bloom.product_occasions",
+        "pk": 6,
+        "fields": {
+            "product": 2,
+            "occasion": 5
+        }
+    },
+    {
+        "model": "bloom.product_occasions",
+        "pk": 7,
+        "fields": {
+            "product": 3,
+            "occasion": 1
+        }
+    },
+    {
+        "model": "bloom.product_occasions",
+        "pk": 8,
+        "fields": {
+            "product": 3,
+            "occasion": 2
+        }
+    },
+    {
+        "model": "bloom.product_occasions",
+        "pk": 9,
+        "fields": {
+            "product": 3,
+            "occasion": 3
+        }
+    },
+    {
+        "model": "bloom.product_occasions",
+        "pk": 10,
+        "fields": {
+            "product": 3,
+            "occasion": 4
+        }
+    },
+    {
+        "model": "bloom.product_occasions",
+        "pk": 11,
+        "fields": {
+            "product": 3,
+            "occasion": 5
+        }
+    },
+    {
+        "model": "bloom.product_occasions",
+        "pk": 12,
+        "fields": {
+            "product": 4,
+            "occasion": 1
+        }
+    },
+    {
+        "model": "bloom.product_occasions",
+        "pk": 13,
+        "fields": {
+            "product": 4,
+            "occasion": 2
+        }
+    },
+    {
+        "model": "bloom.product_occasions",
+        "pk": 14,
+        "fields": {
+            "product": 4,
+            "occasion": 5
+        }
+    },
+    {
+        "model": "bloom.product_occasions",
+        "pk": 15,
+        "fields": {
+            "product": 5,
+            "occasion": 2
+        }
+    },
+    {
+        "model": "bloom.product_occasions",
+        "pk": 16,
+        "fields": {
+            "product": 5,
+            "occasion": 3
+        }
+    },
+    {
+        "model": "bloom.product_occasions",
+        "pk": 17,
+        "fields": {
+            "product": 5,
+            "occasion": 4
+        }
+    }
+]

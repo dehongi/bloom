@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Terms of Service - Bloom Floral & Gifts
+{% endblock %}
+
+{% block content %}
+  <div class="container py-5">
+    <div class="row">
+      <div class="col-lg-8 mx-auto">
+        <div class="card shadow">
+          <div class="card-body p-4 p-lg-5">
+            <h1 class="display-5 mb-4">Terms of Service</h1>
+
+            <p class="lead mb-4">Please read these terms carefully before using our website and services.</p>
+
+            <p>
+              Last updated:{% now 'F j, Y' %}
+            </p>
+
+            <h2 class="h4 mt-5 mb-3">1. Acceptance of Terms</h2>
+            <p>By accessing or using the Bloom Floral & Gifts website and services, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our website or services.</p>
+
+            <h2 class="h4 mt-5 mb-3">2. Products and Services</h2>
+            <p>Bloom Floral & Gifts offers a variety of floral arrangements, plants, gift items, and related services. We strive to accurately represent our products through descriptions and images on our website, but please note that actual colors and arrangements may vary slightly due to the natural variations in flowers and the artistic nature of our designs.</p>
+            <p>Substitutions may be necessary to fulfill your order due to flower availability, seasonality, or other factors. If substitutions are necessary, we will make every effort to maintain the style, theme, and color scheme of the arrangement you ordered.</p>
+
+            <h2 class="h4 mt-5 mb-3">3. Orders and Payments</h2>
+            <p>All orders placed through our website or by phone require full payment at the time of purchase. We accept major credit cards, PayPal, and other payment methods as indicated during checkout.</p>
+            <p>Order confirmations will be sent to the email address provided at checkout. It is your responsibility to ensure the accuracy of your contact information and delivery details.</p>
+            <p>Prices are subject to change without notice. Applicable taxes and delivery fees will be added to your order total during checkout.</p>
+
+            <h2 class="h4 mt-5 mb-3">4. Delivery Policy</h2>
+            <p>We offer delivery services within our designated delivery areas. Delivery fees are based on the delivery address and are calculated during checkout.</p>
+            <p>While we strive to deliver on your requested date and time, delivery times are approximate and may vary due to weather conditions, traffic, and other factors outside our control.</p>
+            <p>For delivery to businesses, hospitals, or schools, if the recipient is not available, the arrangement may be left with a receptionist or other staff member. For residential deliveries, if no one is available to receive the delivery, we may leave the arrangement in a safe location or with a neighbor, or we may attempt delivery the next business day.</p>
+            <p>It is your responsibility to provide accurate and complete delivery information, including any special instructions needed to access the delivery location.</p>
+
+            <h2 class="h4 mt-5 mb-3">5. Cancellations and Refunds</h2>
+            <p>Orders may be canceled or modified up to 24 hours before the scheduled delivery date, subject to the status of your order. For same-day delivery orders, cancellations must be made within 2 hours of placing the order.</p>
+            <p>If you are not completely satisfied with your purchase, please contact us within 24 hours of delivery. We may offer a replacement, store credit, or refund based on the circumstances.</p>
+            <p>We cannot offer refunds for orders that cannot be delivered due to incorrect delivery information or if the recipient is unavailable after a reasonable number of delivery attempts.</p>
+
+            <h2 class="h4 mt-5 mb-3">6. Privacy Policy</h2>
+            <p>
+              Your privacy is important to us. Please review our <a href="{% url 'website:privacy' %}">Privacy Policy</a>
+              to understand how we collect, use, and protect your personal information.
+            </p>
+
+            <h2 class="h4 mt-5 mb-3">7. Account Security</h2>
+            <p>If you create an account on our website, you are responsible for maintaining the confidentiality of your account information and password. You agree to notify us immediately of any unauthorized use of your account.</p>
+
+            <h2 class="h4 mt-5 mb-3">8. Intellectual Property</h2>
+            <p>All content on the Bloom Floral & Gifts website, including text, graphics, logos, images, and software, is the property of Bloom Floral & Gifts or its content suppliers and is protected by copyright laws. You may not reproduce, distribute, modify, or create derivative works of any content without our explicit permission.</p>
+
+            <h2 class="h4 mt-5 mb-3">9. Limitation of Liability</h2>
+            <p>Bloom Floral & Gifts will not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use our services.</p>
+
+            <h2 class="h4 mt-5 mb-3">10. Changes to Terms</h2>
+            <p>We reserve the right to update or modify these Terms of Service at any time without prior notice. Your continued use of our website and services following any changes constitutes your acceptance of the new terms.</p>
+
+            <h2 class="h4 mt-5 mb-3">11. Contact Information</h2>
+            <p>If you have any questions about these Terms of Service, please contact us at:</p>
+            <p>
+              <a href="mailto:info@bloomfloral.com">info@bloomfloral.com</a><br />
+              (212) 555-1234<br />
+              123 Bloom Street<br />
+              New York, NY 10001
+            </p>
+
+            <div class="mt-5 text-center">
+              <a href="{% url 'website:contact' %}" class="btn btn-primary"><i class="bi bi-envelope me-2"></i>Contact Us</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

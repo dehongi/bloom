@@ -1,0 +1,38 @@
+[
+    {
+        "model": "bloom.deliverymethod",
+        "pk": 1,
+        "fields": {
+            "name": "Standard Delivery",
+            "description": "Delivery within 3-5 business days",
+            "price": "9.99"
+        }
+    },
+    {
+        "model": "bloom.deliverymethod",
+        "pk": 2,
+        "fields": {
+            "name": "Express Delivery",
+            "description": "Next-day delivery",
+            "price": "19.99"
+        }
+    },
+    {
+        "model": "bloom.deliverymethod",
+        "pk": 3,
+        "fields": {
+            "name": "Same Day Delivery",
+            "description": "Delivery within hours for local orders",
+            "price": "29.99"
+        }
+    },
+    {
+        "model": "bloom.deliverymethod",
+        "pk": 4,
+        "fields": {
+            "name": "Store Pickup",
+            "description": "Pick up your order at our store",
+            "price": "0.00"
+        }
+    }
+]

@@ -1,0 +1,121 @@
+/* Bloom App Custom CSS */
+
+/* Card styling */
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Status badge styling */
+.badge.status-new {
+    background-color: #6c757d;
+}
+
+.badge.status-design {
+    background-color: #0d6efd;
+}
+
+.badge.status-preparation {
+    background-color: #0dcaf0;
+}
+
+.badge.status-delivery {
+    background-color: #ffc107;
+}
+
+.badge.status-completed {
+    background-color: #198754;
+}
+
+.badge.status-cancelled {
+    background-color: #dc3545;
+}
+
+/* Table styling */
+.table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+/* Form styling */
+.form-control:focus,
+.form-select:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.datepicker {
+    border-radius: 0.375rem;
+}
+
+/* Order detail page */
+.order-status-timeline {
+    position: relative;
+    padding-left: 45px;
+}
+
+.order-status-timeline:before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    height: 100%;
+    width: 2px;
+    background-color: #e9ecef;
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: 1.5rem;
+}
+
+.timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+.timeline-item:before {
+    content: '';
+    position: absolute;
+    left: -30px;
+    top: 0;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: #0d6efd;
+}
+
+/* Order item card styling */
+.order-item-card {
+    border-left: 4px solid #0d6efd;
+}
+
+/* Dashboard stat cards animations */
+.stat-card {
+    overflow: hidden;
+    position: relative;
+}
+
+.stat-card:after {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 20%;
+    height: 200%;
+    opacity: 0;
+    transform: rotate(30deg);
+    background: rgba(255, 255, 255, 0.13);
+    background: linear-gradient(to right,
+            rgba(255, 255, 255, 0.13) 0%,
+            rgba(255, 255, 255, 0.13) 77%,
+            rgba(255, 255, 255, 0.5) 92%,
+            rgba(255, 255, 255, 0.0) 100%);
+}
+
+.stat-card:hover:after {
+    opacity: 1;
+    left: 130%;
+    transition: all 0.7s ease-in-out;
+}

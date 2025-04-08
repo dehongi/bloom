@@ -1,0 +1,355 @@
+{% extends 'bloom/base.html' %}
+{% load static %}
+
+{% block bloom_content %}
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h3 class="card-title mb-4">
+            <i class="bi bi-{% if object %}
+                pencil-square
+              {% else %}
+                plus-circle
+              {% endif %} me-2">
+
+            </i>
+            {% if object %}
+              Edit
+            {% else %}
+              New
+            {% endif %}Order
+          </h3>
+
+          <form method="post" id="order-form">
+            {% csrf_token %}
+
+            <!-- Order Details Section -->
+            <div class="card mb-4">
+              <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Order Information</h5>
+              </div>
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label for="{{ form.reference_number.id_for_label }}" class="form-label">Reference Number*</label>
+                    {{ form.reference_number }}
+                    {% if form.reference_number.errors %}
+                      <div class="invalid-feedback d-block">{{ form.reference_number.errors }}</div>
+                    {% endif %}
+                  </div>
+                  <div class="col-md-6">
+                    <label for="{{ form.salesorder_number.id_for_label }}" class="form-label">Sales Order Number</label>
+                    {{ form.salesorder_number }}
+                    {% if form.salesorder_number.errors %}
+                      <div class="invalid-feedback d-block">{{ form.salesorder_number.errors }}</div>
+                    {% endif %}
+                  </div>
+                  <div class="col-md-6">
+                    <label for="{{ form.customer.id_for_label }}" class="form-label">Customer*</label>
+                    {{ form.customer }}
+                    {% if form.customer.errors %}
+                      <div class="invalid-feedback d-block">{{ form.customer.errors }}</div>
+                    {% endif %}
+                  </div>
+                  <div class="col-md-3">
+                    <label for="{{ form.order_date.id_for_label }}" class="form-label">Order Date*</label>
+                    {{ form.order_date }}
+                    {% if form.order_date.errors %}
+                      <div class="invalid-feedback d-block">{{ form.order_date.errors }}</div>
+                    {% endif %}
+                  </div>
+                  <div class="col-md-3">
+                    <label for="{{ form.shipment_date.id_for_label }}" class="form-label">Shipment Date*</label>
+                    {{ form.shipment_date }}
+                    {% if form.shipment_date.errors %}
+                      <div class="invalid-feedback d-block">{{ form.shipment_date.errors }}</div>
+                    {% endif %}
+                  </div>
+                  <div class="col-md-6">
+                    <label for="{{ form.delivery_method.id_for_label }}" class="form-label">Delivery Method*</label>
+                    {{ form.delivery_method }}
+                    {% if form.delivery_method.errors %}
+                      <div class="invalid-feedback d-block">{{ form.delivery_method.errors }}</div>
+                    {% endif %}
+                  </div>
+                  <div class="col-md-3">
+                    <label for="{{ form.shipping_charge.id_for_label }}" class="form-label">Shipping Charge</label>
+                    {{ form.shipping_charge }}
+                    {% if form.shipping_charge.errors %}
+                      <div class="invalid-feedback d-block">{{ form.shipping_charge.errors }}</div>
+                    {% endif %}
+                  </div>
+                  <div class="col-md-3">
+                    <label for="{{ form.occasion.id_for_label }}" class="form-label">Occasion</label>
+                    {{ form.occasion }}
+                    {% if form.occasion.errors %}
+                      <div class="invalid-feedback d-block">{{ form.occasion.errors }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Shipping Information Section -->
+            <div class="card mb-4">
+              <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-truck me-2"></i>Shipping Information</h5>
+              </div>
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label for="{{ form.recipient_name.id_for_label }}" class="form-label">Recipient Name</label>
+                    {{ form.recipient_name }}
+                    {% if form.recipient_name.errors %}
+                      <div class="invalid-feedback d-block">{{ form.recipient_name.errors }}</div>
+                    {% endif %}
+                  </div>
+                  <div class="col-md-6">
+                    <label for="{{ form.recipient_phone.id_for_label }}" class="form-label">Recipient Phone</label>
+                    {{ form.recipient_phone }}
+                    {% if form.recipient_phone.errors %}
+                      <div class="invalid-feedback d-block">{{ form.recipient_phone.errors }}</div>
+                    {% endif %}
+                  </div>
+                  <div class="col-12">
+                    <label for="{{ form.shipping_address.id_for_label }}" class="form-label">Address*</label>
+                    {{ form.shipping_address }}
+                    {% if form.shipping_address.errors %}
+                      <div class="invalid-feedback d-block">{{ form.shipping_address.errors }}</div>
+                    {% endif %}
+                  </div>
+                  <div class="col-md-6">
+                    <label for="{{ form.shipping_city.id_for_label }}" class="form-label">City*</label>
+                    {{ form.shipping_city }}
+                    {% if form.shipping_city.errors %}
+                      <div class="invalid-feedback d-block">{{ form.shipping_city.errors }}</div>
+                    {% endif %}
+                  </div>
+                  <div class="col-md-6">
+                    <label for="{{ form.shipping_state.id_for_label }}" class="form-label">State/Province*</label>
+                    {{ form.shipping_state }}
+                    {% if form.shipping_state.errors %}
+                      <div class="invalid-feedback d-block">{{ form.shipping_state.errors }}</div>
+                    {% endif %}
+                  </div>
+                  <div class="col-md-6">
+                    <label for="{{ form.shipping_country.id_for_label }}" class="form-label">Country*</label>
+                    {{ form.shipping_country }}
+                    {% if form.shipping_country.errors %}
+                      <div class="invalid-feedback d-block">{{ form.shipping_country.errors }}</div>
+                    {% endif %}
+                  </div>
+                  <div class="col-md-6">
+                    <label for="{{ form.shipping_postal_code.id_for_label }}" class="form-label">Postal Code*</label>
+                    {{ form.shipping_postal_code }}
+                    {% if form.shipping_postal_code.errors %}
+                      <div class="invalid-feedback d-block">{{ form.shipping_postal_code.errors }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Order Items Section -->
+            <div class="card mb-4">
+              <div class="card-header bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                  <h5 class="mb-0"><i class="bi bi-box-seam me-2"></i>Order Items</h5>
+                  <button id="add-item-btn" class="btn btn-sm btn-outline-primary" data-formset-prefix="orderitem_set"><i class="bi bi-plus-circle me-1"></i>Add Item</button>
+                </div>
+              </div>
+              <div class="card-body">
+                {{ items_formset.management_form }}
+                {% if items_formset.non_form_errors %}
+                  <div class="alert alert-danger">{{ items_formset.non_form_errors }}</div>
+                {% endif %}
+
+                <div class="table-responsive">
+                  <table class="table table-bordered">
+                    <thead>
+                      <tr>
+                        <th style="width: 22%">Product</th>
+                        <th style="width: 20%">Name</th>
+                        <th style="width: 28%">Description</th>
+                        <th style="width: 10%">Price</th>
+                        <th style="width: 10%">Quantity</th>
+                        <th style="width: 10%">Total</th>
+                        <th>Delete</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for item_form in items_formset.forms %}
+                        <div class="d-none">{{ item_form.id }}</div>
+                        <tr class="formset-form orderitem_set-form">
+                          <td>
+                            {{ item_form.product }}
+                            {% if item_form.product.errors %}
+                              <div class="invalid-feedback d-block">{{ item_form.product.errors }}</div>
+                            {% endif %}
+                          </td>
+                          <td>
+                            {{ item_form.name }}
+                            {% if item_form.name.errors %}
+                              <div class="invalid-feedback d-block">{{ item_form.name.errors }}</div>
+                            {% endif %}
+                          </td>
+                          <td>
+                            {{ item_form.description }}
+                            {% if item_form.description.errors %}
+                              <div class="invalid-feedback d-block">{{ item_form.description.errors }}</div>
+                            {% endif %}
+                          </td>
+                          <td>
+                            {{ item_form.price }}
+                            {% if item_form.price.errors %}
+                              <div class="invalid-feedback d-block">{{ item_form.price.errors }}</div>
+                            {% endif %}
+                          </td>
+                          <td>
+                            {{ item_form.quantity }}
+                            {% if item_form.quantity.errors %}
+                              <div class="invalid-feedback d-block">{{ item_form.quantity.errors }}</div>
+                            {% endif %}
+                          </td>
+                          <td>
+                            <span class="item-total" data-item-total="0.00">0.00</span>
+                          </td>
+                          <td>
+                            {% if items_formset.can_delete %}
+                              <div class="form-check d-flex justify-content-center">{{ item_form.DELETE }}</div>
+                            {% endif %}
+                          </td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Additional Information Section -->
+            <div class="card mb-4">
+              <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-card-text me-2"></i>Additional Information</h5>
+              </div>
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-md-12">
+                    <label for="{{ form.message.id_for_label }}" class="form-label">Message</label>
+                    {{ form.message }}
+                    {% if form.message.errors %}
+                      <div class="invalid-feedback d-block">{{ form.message.errors }}</div>
+                    {% endif %}
+                  </div>
+                  <div class="col-md-12">
+                    <label for="{{ form.notes.id_for_label }}" class="form-label">Notes</label>
+                    {{ form.notes }}
+                    {% if form.notes.errors %}
+                      <div class="invalid-feedback d-block">{{ form.notes.errors }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Order Summary Section -->
+            <div class="card mb-4">
+              <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-cash-coin me-2"></i>Order Summary</h5>
+              </div>
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label for="{{ form.status.id_for_label }}" class="form-label">Order Status*</label>
+                    {{ form.status }}
+                    {% if form.status.errors %}
+                      <div class="invalid-feedback d-block">{{ form.status.errors }}</div>
+                    {% endif %}
+                  </div>
+                  <div class="col-md-3">
+                    <label for="{{ form.discount_percentage.id_for_label }}" class="form-label">Discount %</label>
+                    {{ form.discount_percentage }}
+                    {% if form.discount_percentage.errors %}
+                      <div class="invalid-feedback d-block">{{ form.discount_percentage.errors }}</div>
+                    {% endif %}
+                  </div>
+                  <div class="col-md-3">
+                    <label for="{{ form.tax_amount.id_for_label }}" class="form-label">Tax Amount</label>
+                    {{ form.tax_amount }}
+                    {% if form.tax_amount.errors %}
+                      <div class="invalid-feedback d-block">{{ form.tax_amount.errors }}</div>
+                    {% endif %}
+                  </div>
+
+                  <!-- Hidden fields -->
+                  <div class="d-none">{{ form.subtotal }}
+                    {{ form.discount_value }}
+                    {{ form.total }}
+                    {{ form.discount_type }}
+                    {{ form.is_discount_before_tax }}</div>
+
+                  <!-- Order Totals -->
+                  <div class="col-md-12 mt-4">
+                    <div class="card bg-light">
+                      <div class="card-body">
+                        <div class="row">
+                          <div class="col-md-8 offset-md-4">
+                            <div class="d-flex justify-content-between mb-2">
+                              <h6 class="fw-bold mb-0">Subtotal:</h6>
+                              <div>
+                                $<span id="subtotal-display">0.00</span>
+                              </div>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                              <h6 class="fw-bold mb-0">Discount:</h6>
+                              <div>
+                                $<span id="discount-display">0.00</span>
+                              </div>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                              <h6 class="fw-bold mb-0">Shipping:</h6>
+                              <div>
+                                $<span id="shipping-display">0.00</span>
+                              </div>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                              <h6 class="fw-bold mb-0">Tax:</h6>
+                              <div>
+                                $<span id="tax-display">0.00</span>
+                              </div>
+                            </div>
+                            <hr />
+                            <div class="d-flex justify-content-between">
+                              <h5 class="fw-bold mb-0">Total:</h5>
+                              <div class="fw-bold fs-5">
+                                $<span id="total-display">0.00</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="d-flex justify-content-between">
+              <a href="{% if object %}
+                  {% url 'bloom:order_detail' object.pk %}
+                {% else %}
+                  {% url 'bloom:order_list' %}
+                {% endif %}"
+                class="btn btn-outline-secondary">
+                <i class="bi bi-x-circle me-1"></i>Cancel
+              </a>
+              <button type="submit" class="btn btn-primary px-4"><i class="bi bi-save me-1"></i>Save Order</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

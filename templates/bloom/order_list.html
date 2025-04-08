@@ -1,0 +1,179 @@
+{% extends 'bloom/base.html' %}
+{% load static %}
+
+{% block bloom_content %}
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="card-title mb-0"><i class="bi bi-bag me-2"></i>Orders</h3>
+            <a href="{% url 'bloom:order_create' %}" class="btn btn-primary"><i class="bi bi-plus-circle me-1"></i>New Order</a>
+          </div>
+
+          <!-- Search and Filter Form -->
+          <form method="get" class="mb-4">
+            <div class="row g-3">
+              <div class="col-md-4">
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-search"></i></span>
+                  {{ search_form.search }}
+                </div>
+              </div>
+              <div class="col-md-2">{{ search_form.status }}</div>
+              <div class="col-md-2">{{ search_form.from_date }}</div>
+              <div class="col-md-2">{{ search_form.to_date }}</div>
+              <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+              </div>
+            </div>
+          </form>
+
+          <!-- Orders Table -->
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Reference #</th>
+                  <th>Customer</th>
+                  <th>Order Date</th>
+                  <th>Shipment Date</th>
+                  <th>Status</th>
+                  <th>Total</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for order in orders %}
+                  <tr>
+                    <td>
+                      <a href="{% url 'bloom:order_detail' order.pk %}">{{ order.reference_number }}</a>
+                    </td>
+                    <td>{{ order.customer.name }}</td>
+                    <td>{{ order.order_date }}</td>
+                    <td>{{ order.shipment_date }}</td>
+                    <td>
+                      <span class="badge rounded-pill 
+                    {% if order.status == 'new' %}
+                          bg-secondary
+
+                        {% elif order.status == 'design' %}
+                          bg-primary
+
+                        {% elif order.status == 'preparation' %}
+                          bg-info
+
+                        {% elif order.status == 'delivery' %}
+                          bg-warning
+
+                        {% elif order.status == 'completed' %}
+                          bg-success
+
+                        {% else %}
+                          bg-danger
+                        {% endif %}">
+                        {{ order.get_status_display }}
+                      </span>
+                    </td>
+                    <td>${{ order.total }}</td>
+                    <td>
+                      <div class="btn-group btn-group-sm">
+                        <a href="{% url 'bloom:order_detail' order.pk %}" class="btn btn-outline-primary" title="View"><i class="bi bi-eye"></i></a>
+                        <a href="{% url 'bloom:order_update' order.pk %}" class="btn btn-outline-secondary" title="Edit"><i class="bi bi-pencil"></i></a>
+                        <a href="{% url 'bloom:order_delete' order.pk %}" class="btn btn-outline-danger delete-confirm-btn" title="Delete"><i class="bi bi-trash"></i></a>
+                      </div>
+                    </td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="7" class="text-center py-4">
+                      <div class="text-muted">
+                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                        <p>
+                          No orders found. <a href="{% url 'bloom:order_create' %}">Create a new order</a>.
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          {% if is_paginated %}
+            <nav aria-label="Page navigation" class="mt-4">
+              <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                  <li class="page-item">
+                    <a class="page-link"
+                      href="?page=1{% if request.GET.search %}
+                        &search={{ request.GET.search }}
+                      {% endif %}{% if request.GET.status %}
+                        &status={{ request.GET.status }}
+                      {% endif %}{% if request.GET.from_date %}
+                        &from_date={{ request.GET.from_date }}
+                      {% endif %}{% if request.GET.to_date %}
+                        &to_date={{ request.GET.to_date }}
+                      {% endif %}">
+                      &laquo; First
+                    </a>
+                  </li>
+                  <li class="page-item">
+                    <a class="page-link"
+                      href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}
+                        &search={{ request.GET.search }}
+                      {% endif %}{% if request.GET.status %}
+                        &status={{ request.GET.status }}
+                      {% endif %}{% if request.GET.from_date %}
+                        &from_date={{ request.GET.from_date }}
+                      {% endif %}{% if request.GET.to_date %}
+                        &to_date={{ request.GET.to_date }}
+                      {% endif %}">
+                      Previous
+                    </a>
+                  </li>
+                {% endif %}
+
+                <li class="page-item disabled">
+                  <a class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</a>
+                </li>
+
+                {% if page_obj.has_next %}
+                  <li class="page-item">
+                    <a class="page-link"
+                      href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}
+                        &search={{ request.GET.search }}
+                      {% endif %}{% if request.GET.status %}
+                        &status={{ request.GET.status }}
+                      {% endif %}{% if request.GET.from_date %}
+                        &from_date={{ request.GET.from_date }}
+                      {% endif %}{% if request.GET.to_date %}
+                        &to_date={{ request.GET.to_date }}
+                      {% endif %}">
+                      Next
+                    </a>
+                  </li>
+                  <li class="page-item">
+                    <a class="page-link"
+                      href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}
+                        &search={{ request.GET.search }}
+                      {% endif %}{% if request.GET.status %}
+                        &status={{ request.GET.status }}
+                      {% endif %}{% if request.GET.from_date %}
+                        &from_date={{ request.GET.from_date }}
+                      {% endif %}{% if request.GET.to_date %}
+                        &to_date={{ request.GET.to_date }}
+                      {% endif %}">
+                      Last &raquo;
+                    </a>
+                  </li>
+                {% endif %}
+              </ul>
+            </nav>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,62 @@
+[
+    {
+        "model": "bloom.product",
+        "pk": 1,
+        "fields": {
+            "name": "Rose Bouquet",
+            "sku": "RB-001",
+            "description": "A beautiful bouquet of red roses",
+            "price": "49.99",
+            "product_type": 1,
+            "external_id": "PROD-001"
+        }
+    },
+    {
+        "model": "bloom.product",
+        "pk": 2,
+        "fields": {
+            "name": "Succulent Plant",
+            "sku": "SP-002",
+            "description": "Easy-care indoor succulent plant",
+            "price": "24.99",
+            "product_type": 2,
+            "external_id": "PROD-002"
+        }
+    },
+    {
+        "model": "bloom.product",
+        "pk": 3,
+        "fields": {
+            "name": "Spring Arrangement",
+            "sku": "SA-003",
+            "description": "Colorful arrangement with seasonal spring flowers",
+            "price": "59.99",
+            "product_type": 3,
+            "external_id": "PROD-003"
+        }
+    },
+    {
+        "model": "bloom.product",
+        "pk": 4,
+        "fields": {
+            "name": "Deluxe Gift Basket",
+            "sku": "DGB-004",
+            "description": "Premium gift basket with flowers and chocolates",
+            "price": "89.99",
+            "product_type": 4,
+            "external_id": "PROD-004"
+        }
+    },
+    {
+        "model": "bloom.product",
+        "pk": 5,
+        "fields": {
+            "name": "Lily Bouquet",
+            "sku": "LB-005",
+            "description": "Elegant bouquet of white lilies",
+            "price": "54.99",
+            "product_type": 1,
+            "external_id": "PROD-005"
+        }
+    }
+]

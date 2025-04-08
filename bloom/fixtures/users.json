@@ -1,0 +1,56 @@
+[
+    {
+        "model": "accounts.customuser",
+        "pk": 1,
+        "fields": {
+            "password": "pbkdf2_sha256$720000$iRpnMXgMHTYiUU1rABGNvr$w7Nm8YYGmf2nNDgNYbQvEw5TgXrQ2d3hDGXN0nPiKcU=",
+            "last_login": "2023-04-08T12:00:00Z",
+            "is_superuser": true,
+            "first_name": "Admin",
+            "last_name": "User",
+            "is_staff": true,
+            "is_active": true,
+            "date_joined": "2023-04-01T12:00:00Z",
+            "bio": "System administrator",
+            "email": "admin@example.com",
+            "groups": [],
+            "user_permissions": []
+        }
+    },
+    {
+        "model": "accounts.customuser",
+        "pk": 2,
+        "fields": {
+            "password": "pbkdf2_sha256$720000$iRpnMXgMHTYiUU1rABGNvr$w7Nm8YYGmf2nNDgNYbQvEw5TgXrQ2d3hDGXN0nPiKcU=",
+            "last_login": "2023-04-08T12:00:00Z",
+            "is_superuser": false,
+            "first_name": "Store",
+            "last_name": "Manager",
+            "is_staff": true,
+            "is_active": true,
+            "date_joined": "2023-04-01T12:00:00Z",
+            "bio": "Store manager",
+            "email": "manager@example.com",
+            "groups": [],
+            "user_permissions": []
+        }
+    },
+    {
+        "model": "accounts.customuser",
+        "pk": 3,
+        "fields": {
+            "password": "pbkdf2_sha256$720000$iRpnMXgMHTYiUU1rABGNvr$w7Nm8YYGmf2nNDgNYbQvEw5TgXrQ2d3hDGXN0nPiKcU=",
+            "last_login": "2023-04-08T12:00:00Z",
+            "is_superuser": false,
+            "first_name": "Regular",
+            "last_name": "User",
+            "is_staff": false,
+            "is_active": true,
+            "date_joined": "2023-04-01T12:00:00Z",
+            "bio": "Customer",
+            "email": "user@example.com",
+            "groups": [],
+            "user_permissions": []
+        }
+    }
+]

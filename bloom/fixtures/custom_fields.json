@@ -1,0 +1,74 @@
+[
+    {
+        "model": "bloom.customfield",
+        "pk": 1,
+        "fields": {
+            "order": 1,
+            "field_id": "card_message",
+            "value": "Hope you have a fantastic birthday! Love, John"
+        }
+    },
+    {
+        "model": "bloom.customfield",
+        "pk": 2,
+        "fields": {
+            "order": 1,
+            "field_id": "ribbon_color",
+            "value": "Red"
+        }
+    },
+    {
+        "model": "bloom.customfield",
+        "pk": 3,
+        "fields": {
+            "order": 2,
+            "field_id": "card_message",
+            "value": "Happy Anniversary! Wishing you many more years of happiness."
+        }
+    },
+    {
+        "model": "bloom.customfield",
+        "pk": 4,
+        "fields": {
+            "order": 3,
+            "field_id": "preferred_delivery_time",
+            "value": "Morning"
+        }
+    },
+    {
+        "model": "bloom.customfield",
+        "pk": 5,
+        "fields": {
+            "order": 3,
+            "field_id": "special_instructions",
+            "value": "Please call recipient before delivery"
+        }
+    },
+    {
+        "model": "bloom.customfield",
+        "pk": 6,
+        "fields": {
+            "order": 4,
+            "field_id": "card_message",
+            "value": "Congratulations on your special day!"
+        }
+    },
+    {
+        "model": "bloom.customfield",
+        "pk": 7,
+        "fields": {
+            "order": 4,
+            "field_id": "flower_preferences",
+            "value": "No lilies, prefer roses and tulips"
+        }
+    },
+    {
+        "model": "bloom.customfield",
+        "pk": 8,
+        "fields": {
+            "order": 5,
+            "field_id": "pickup_time",
+            "value": "4:00 PM"
+        }
+    }
+]

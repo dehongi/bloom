@@ -1,0 +1,128 @@
+[
+    {
+        "model": "bloom.orderitem",
+        "pk": 1,
+        "fields": {
+            "order": 1,
+            "product": 1,
+            "name": "Rose Bouquet",
+            "description": "A beautiful bouquet of red roses",
+            "price": "49.99",
+            "quantity": 1,
+            "external_item_id": null,
+            "header_name": ""
+        }
+    },
+    {
+        "model": "bloom.orderitem",
+        "pk": 2,
+        "fields": {
+            "order": 2,
+            "product": 2,
+            "name": "Succulent Plant",
+            "description": "Easy-care indoor succulent plant",
+            "price": "24.99",
+            "quantity": 1,
+            "external_item_id": null,
+            "header_name": ""
+        }
+    },
+    {
+        "model": "bloom.orderitem",
+        "pk": 3,
+        "fields": {
+            "order": 2,
+            "product": 5,
+            "name": "Lily Bouquet",
+            "description": "Elegant bouquet of white lilies",
+            "price": "54.99",
+            "quantity": 1,
+            "external_item_id": null,
+            "header_name": ""
+        }
+    },
+    {
+        "model": "bloom.orderitem",
+        "pk": 4,
+        "fields": {
+            "order": 2,
+            "product": 2,
+            "name": "Succulent Plant",
+            "description": "Easy-care indoor succulent plant",
+            "price": "24.99",
+            "quantity": 1,
+            "external_item_id": null,
+            "header_name": "Additional Plant"
+        }
+    },
+    {
+        "model": "bloom.orderitem",
+        "pk": 5,
+        "fields": {
+            "order": 3,
+            "product": 4,
+            "name": "Deluxe Gift Basket",
+            "description": "Premium gift basket with flowers and chocolates",
+            "price": "89.99",
+            "quantity": 1,
+            "external_item_id": null,
+            "header_name": ""
+        }
+    },
+    {
+        "model": "bloom.orderitem",
+        "pk": 6,
+        "fields": {
+            "order": 4,
+            "product": 3,
+            "name": "Spring Arrangement",
+            "description": "Colorful arrangement with seasonal spring flowers",
+            "price": "59.99",
+            "quantity": 1,
+            "external_item_id": null,
+            "header_name": ""
+        }
+    },
+    {
+        "model": "bloom.orderitem",
+        "pk": 7,
+        "fields": {
+            "order": 4,
+            "product": 1,
+            "name": "Rose Bouquet",
+            "description": "A beautiful bouquet of red roses",
+            "price": "49.99",
+            "quantity": 1,
+            "external_item_id": null,
+            "header_name": ""
+        }
+    },
+    {
+        "model": "bloom.orderitem",
+        "pk": 8,
+        "fields": {
+            "order": 4,
+            "product": 2,
+            "name": "Succulent Plant",
+            "description": "Easy-care indoor succulent plant",
+            "price": "24.99",
+            "quantity": 1,
+            "external_item_id": null,
+            "header_name": "Gift Addition"
+        }
+    },
+    {
+        "model": "bloom.orderitem",
+        "pk": 9,
+        "fields": {
+            "order": 5,
+            "product": 5,
+            "name": "Lily Bouquet",
+            "description": "Elegant bouquet of white lilies",
+            "price": "54.99",
+            "quantity": 1,
+            "external_item_id": null,
+            "header_name": ""
+        }
+    }
+]

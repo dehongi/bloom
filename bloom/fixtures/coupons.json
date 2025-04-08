@@ -1,0 +1,146 @@
+[
+    {
+        "model": "shop.coupon",
+        "pk": 1,
+        "fields": {
+            "code": "WELCOME10",
+            "discount_type": "percentage",
+            "discount_value": "10.00",
+            "min_order_value": "0.00",
+            "active": true,
+            "valid_from": "2023-01-01T00:00:00Z",
+            "valid_to": "2024-12-31T23:59:59Z",
+            "single_use": false,
+            "max_uses": 0,
+            "times_used": 0,
+            "created_at": "2023-01-01T12:00:00Z",
+            "updated_at": "2023-01-01T12:00:00Z"
+        }
+    },
+    {
+        "model": "shop.coupon",
+        "pk": 2,
+        "fields": {
+            "code": "SUMMER20",
+            "discount_type": "percentage",
+            "discount_value": "20.00",
+            "min_order_value": "50.00",
+            "active": true,
+            "valid_from": "2023-06-01T00:00:00Z",
+            "valid_to": "2023-08-31T23:59:59Z",
+            "single_use": false,
+            "max_uses": 100,
+            "times_used": 45,
+            "created_at": "2023-05-15T12:00:00Z",
+            "updated_at": "2023-05-15T12:00:00Z"
+        }
+    },
+    {
+        "model": "shop.coupon",
+        "pk": 3,
+        "fields": {
+            "code": "FIXED15",
+            "discount_type": "fixed",
+            "discount_value": "15.00",
+            "min_order_value": "75.00",
+            "active": true,
+            "valid_from": "2023-01-01T00:00:00Z",
+            "valid_to": "2024-12-31T23:59:59Z",
+            "single_use": false,
+            "max_uses": 0,
+            "times_used": 12,
+            "created_at": "2023-01-01T12:00:00Z",
+            "updated_at": "2023-01-01T12:00:00Z"
+        }
+    },
+    {
+        "model": "shop.coupon",
+        "pk": 4,
+        "fields": {
+            "code": "ONEUSE25",
+            "discount_type": "percentage",
+            "discount_value": "25.00",
+            "min_order_value": "100.00",
+            "active": true,
+            "valid_from": "2023-01-01T00:00:00Z",
+            "valid_to": "2024-12-31T23:59:59Z",
+            "single_use": true,
+            "max_uses": 0,
+            "times_used": 5,
+            "created_at": "2023-02-15T12:00:00Z",
+            "updated_at": "2023-02-15T12:00:00Z"
+        }
+    },
+    {
+        "model": "shop.coupon",
+        "pk": 5,
+        "fields": {
+            "code": "EXPIRED",
+            "discount_type": "percentage",
+            "discount_value": "50.00",
+            "min_order_value": "0.00",
+            "active": true,
+            "valid_from": "2022-01-01T00:00:00Z",
+            "valid_to": "2022-12-31T23:59:59Z",
+            "single_use": false,
+            "max_uses": 0,
+            "times_used": 20,
+            "created_at": "2022-01-01T12:00:00Z",
+            "updated_at": "2022-01-01T12:00:00Z"
+        }
+    },
+    {
+        "model": "shop.coupon",
+        "pk": 6,
+        "fields": {
+            "code": "INACTIVE",
+            "discount_type": "percentage",
+            "discount_value": "15.00",
+            "min_order_value": "0.00",
+            "active": false,
+            "valid_from": "2023-01-01T00:00:00Z",
+            "valid_to": "2024-12-31T23:59:59Z",
+            "single_use": false,
+            "max_uses": 0,
+            "times_used": 0,
+            "created_at": "2023-01-01T12:00:00Z",
+            "updated_at": "2023-01-01T12:00:00Z"
+        }
+    },
+    {
+        "model": "shop.coupon",
+        "pk": 7,
+        "fields": {
+            "code": "FIXED50",
+            "discount_type": "fixed",
+            "discount_value": "50.00",
+            "min_order_value": "200.00",
+            "active": true,
+            "valid_from": "2023-01-01T00:00:00Z",
+            "valid_to": "2024-12-31T23:59:59Z",
+            "single_use": false,
+            "max_uses": 50,
+            "times_used": 10,
+            "created_at": "2023-03-01T12:00:00Z",
+            "updated_at": "2023-03-01T12:00:00Z"
+        }
+    },
+    {
+        "model": "shop.coupon",
+        "pk": 8,
+        "fields": {
+            "code": "HOLIDAY30",
+            "discount_type": "percentage",
+            "discount_value": "30.00",
+            "min_order_value": "100.00",
+            "active": true,
+            "valid_from": "2023-11-15T00:00:00Z",
+            "valid_to": "2023-12-31T23:59:59Z",
+            "single_use": false,
+            "max_uses": 200,
+            "times_used": 0,
+            "created_at": "2023-11-01T12:00:00Z",
+            "updated_at": "2023-11-01T12:00:00Z"
+        }
+    }
+]

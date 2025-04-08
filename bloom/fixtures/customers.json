@@ -1,0 +1,82 @@
+[
+    {
+        "model": "bloom.customer",
+        "pk": 1,
+        "fields": {
+            "user": 3,
+            "name": "Jane Smith",
+            "email": "jane.smith@example.com",
+            "phone": "555-123-4567",
+            "address": "123 Main St",
+            "city": "New York",
+            "state": "NY",
+            "country": "USA",
+            "postal_code": "10001",
+            "external_id": "CUST-001"
+        }
+    },
+    {
+        "model": "bloom.customer",
+        "pk": 2,
+        "fields": {
+            "user": null,
+            "name": "John Doe",
+            "email": "john.doe@example.com",
+            "phone": "555-987-6543",
+            "address": "456 Oak Ave",
+            "city": "Los Angeles",
+            "state": "CA",
+            "country": "USA",
+            "postal_code": "90001",
+            "external_id": "CUST-002"
+        }
+    },
+    {
+        "model": "bloom.customer",
+        "pk": 3,
+        "fields": {
+            "user": null,
+            "name": "Maria Garcia",
+            "email": "maria.garcia@example.com",
+            "phone": "555-246-8024",
+            "address": "789 Elm St",
+            "city": "Chicago",
+            "state": "IL",
+            "country": "USA",
+            "postal_code": "60007",
+            "external_id": "CUST-003"
+        }
+    },
+    {
+        "model": "bloom.customer",
+        "pk": 4,
+        "fields": {
+            "user": null,
+            "name": "Michael Johnson",
+            "email": "michael.johnson@example.com",
+            "phone": "555-135-7924",
+            "address": "321 Pine Rd",
+            "city": "Seattle",
+            "state": "WA",
+            "country": "USA",
+            "postal_code": "98101",
+            "external_id": "CUST-004"
+        }
+    },
+    {
+        "model": "bloom.customer",
+        "pk": 5,
+        "fields": {
+            "user": null,
+            "name": "Sarah Williams",
+            "email": "sarah.williams@example.com",
+            "phone": "555-369-1478",
+            "address": "654 Maple Dr",
+            "city": "Boston",
+            "state": "MA",
+            "country": "USA",
+            "postal_code": "02108",
+            "external_id": "CUST-005"
+        }
+    }
+]

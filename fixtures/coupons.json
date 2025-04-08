@@ -1,0 +1,74 @@
+[
+    {
+        "model": "shop.coupon",
+        "pk": 1,
+        "fields": {
+            "code": "WELCOME10",
+            "discount_type": "percentage",
+            "discount_value": "10.00",
+            "min_order_value": "0.00",
+            "active": true,
+            "valid_from": "2023-01-01T00:00:00Z",
+            "valid_to": "2025-12-31T23:59:59Z",
+            "single_use": false,
+            "max_uses": 0,
+            "times_used": 0,
+            "created_at": "2023-01-01T00:00:00Z",
+            "updated_at": "2023-01-01T00:00:00Z"
+        }
+    },
+    {
+        "model": "shop.coupon",
+        "pk": 2,
+        "fields": {
+            "code": "SAVE20",
+            "discount_type": "fixed",
+            "discount_value": "20.00",
+            "min_order_value": "100.00",
+            "active": true,
+            "valid_from": "2023-01-01T00:00:00Z",
+            "valid_to": "2025-12-31T23:59:59Z",
+            "single_use": false,
+            "max_uses": 0,
+            "times_used": 0,
+            "created_at": "2023-01-01T00:00:00Z",
+            "updated_at": "2023-01-01T00:00:00Z"
+        }
+    },
+    {
+        "model": "shop.coupon",
+        "pk": 3,
+        "fields": {
+            "code": "SUMMER25",
+            "discount_type": "percentage",
+            "discount_value": "25.00",
+            "min_order_value": "50.00",
+            "active": true,
+            "valid_from": "2023-06-01T00:00:00Z",
+            "valid_to": "2023-08-31T23:59:59Z",
+            "single_use": true,
+            "max_uses": 100,
+            "times_used": 0,
+            "created_at": "2023-01-01T00:00:00Z",
+            "updated_at": "2023-01-01T00:00:00Z"
+        }
+    },
+    {
+        "model": "shop.coupon",
+        "pk": 4,
+        "fields": {
+            "code": "FREESHIPPING",
+            "discount_type": "fixed",
+            "discount_value": "10.00",
+            "min_order_value": "75.00",
+            "active": true,
+            "valid_from": "2023-01-01T00:00:00Z",
+            "valid_to": "2025-12-31T23:59:59Z",
+            "single_use": false,
+            "max_uses": 0,
+            "times_used": 0,
+            "created_at": "2023-01-01T00:00:00Z",
+            "updated_at": "2023-01-01T00:00:00Z"
+        }
+    }
+]

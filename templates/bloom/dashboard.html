@@ -1,0 +1,246 @@
+{% extends 'bloom/base.html' %}
+{% load static %}
+
+{% block bloom_content %}
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h3 class="card-title"><i class="bi bi-speedometer2 me-2"></i>Dashboard</h3>
+          <p class="text-muted">Welcome to the Bloom Flower Shop management system.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm text-white bg-primary mb-3">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="card-title mb-0">Total Orders</h6>
+              <h2 class="my-2">{{ total_orders }}</h2>
+              <p class="card-text mb-0">All time orders</p>
+            </div>
+            <div>
+              <i class="bi bi-bag-check fs-1"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm text-white bg-warning mb-3">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="card-title mb-0">Pending Orders</h6>
+              <h2 class="my-2">{{ pending_orders }}</h2>
+              <p class="card-text mb-0">In processing</p>
+            </div>
+            <div>
+              <i class="bi bi-hourglass-split fs-1"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm text-white bg-info mb-3">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="card-title mb-0">Delivery</h6>
+              <h2 class="my-2">{{ delivery_orders }}</h2>
+              <p class="card-text mb-0">On delivery</p>
+            </div>
+            <div>
+              <i class="bi bi-truck fs-1"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm text-white bg-success mb-3">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="card-title mb-0">Completed</h6>
+              <h2 class="my-2">{{ completed_orders }}</h2>
+              <p class="card-text mb-0">Delivered orders</p>
+            </div>
+            <div>
+              <i class="bi bi-check-circle fs-1"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Orders and Charts Row -->
+  <div class="row">
+    <!-- Recent Orders -->
+    <div class="col-lg-8 mb-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Recent Orders</h5>
+            <a href="{% url 'bloom:order_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Reference</th>
+                  <th>Customer</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for order in recent_orders %}
+                  <tr>
+                    <td>
+                      <a href="{% url 'bloom:order_detail' order.pk %}">{{ order.reference_number }}</a>
+                    </td>
+                    <td>{{ order.customer.name }}</td>
+                    <td>{{ order.order_date }}</td>
+                    <td>
+                      <span class="badge rounded-pill 
+                    {% if order.status == 'new' %}
+                          bg-secondary
+
+                        {% elif order.status == 'design' %}
+                          bg-primary
+
+                        {% elif order.status == 'preparation' %}
+                          bg-info
+
+                        {% elif order.status == 'delivery' %}
+                          bg-warning
+
+                        {% elif order.status == 'completed' %}
+                          bg-success
+
+                        {% else %}
+                          bg-danger
+                        {% endif %}">
+                        {{ order.get_status_display }}
+                      </span>
+                    </td>
+                    <td>${{ order.total }}</td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="5" class="text-center">No orders found.</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Status Chart -->
+    <div class="col-lg-4 mb-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white">
+          <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Order Status</h5>
+        </div>
+        <div class="card-body">
+          <canvas id="orderStatusChart" height="250"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white">
+          <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>Quick Actions</h5>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <a href="{% url 'bloom:order_create' %}" class="btn btn-primary w-100 py-3"><i class="bi bi-plus-circle me-2"></i>New Order</a>
+            </div>
+            <div class="col-md-3">
+              <a href="{% url 'bloom:product_create' %}" class="btn btn-success w-100 py-3"><i class="bi bi-plus-circle me-2"></i>Add Product</a>
+            </div>
+            <div class="col-md-3">
+              <a href="{% url 'bloom:customer_create' %}" class="btn btn-info w-100 py-3 text-white"><i class="bi bi-person-plus me-2"></i>Add Customer</a>
+            </div>
+            <div class="col-md-3">
+              <a href="{% url 'bloom:order_list' %}?status=new" class="btn btn-warning w-100 py-3 text-white"><i class="bi bi-hourglass-top me-2"></i>View New Orders</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra_js %}
+  {{ block.super }}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Order Status Chart
+    const statusCounts = {{ status_counts|safe }};
+    
+    // Extract labels and data from status_counts
+    let labels = [];
+    let data = [];
+    let backgroundColors = [];
+    
+    const colorMap = {
+      'new': '#6c757d',       // secondary
+      'design': '#0d6efd',    // primary
+      'preparation': '#0dcaf0', // info
+      'delivery': '#ffc107',  // warning
+      'completed': '#198754', // success
+      'cancelled': '#dc3545'  // danger
+    };
+    
+    statusCounts.forEach(function(item) {
+      labels.push(item.status.charAt(0).toUpperCase() + item.status.slice(1));
+      data.push(item.count);
+      backgroundColors.push(colorMap[item.status] || '#6c757d');
+    });
+    
+    const ctx = document.getElementById('orderStatusChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: data,
+          backgroundColor: backgroundColors,
+          hoverOffset: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'bottom',
+          }
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}

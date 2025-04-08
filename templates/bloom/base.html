@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  Bloom Flower Shop
+{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'bloom/css/bloom.css' %}" />
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'bloom/js/bloom.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+  <div class="row">
+    <!-- Sidebar Navigation -->
+    <div class="col-md-3 col-xl-2 mb-4">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0"><i class="bi bi-flower1 me-2"></i>Bloom</h5>
+        </div>
+        <div class="list-group list-group-flush">
+          <a href="{% url 'bloom:dashboard' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+          <a href="{% url 'bloom:order_list' %}" class="list-group-item list-group-item-action {% if 'order' in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-bag me-2"></i>Orders</a>
+          <a href="{% url 'bloom:product_list' %}" class="list-group-item list-group-item-action {% if 'product' in request.resolver_match.url_name and 'type' not in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-box-seam me-2"></i>Products</a>
+          <a href="{% url 'bloom:customer_list' %}" class="list-group-item list-group-item-action {% if 'customer' in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-people me-2"></i>Customers</a>
+          <div class="list-group-item list-group-item-action fw-bold">Settings</div>
+          <a href="{% url 'bloom:occasion_list' %}" class="list-group-item list-group-item-action {% if 'occasion' in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-calendar-event me-2"></i>Occasions</a>
+          <a href="{% url 'bloom:product_type_list' %}" class="list-group-item list-group-item-action {% if 'product_type' in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-tags me-2"></i>Product Types</a>
+          <a href="{% url 'bloom:delivery_method_list' %}" class="list-group-item list-group-item-action {% if 'delivery_method' in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-truck me-2"></i>Delivery Methods</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="col-md-9 col-xl-10">
+      {% block bloom_content %}
+
+      {% endblock %}
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  Shopping Cart - Bloom
+{% endblock %}
+
+{% block content %}
+  <div class="container my-5">
+    <h1 class="mb-4">Shopping Cart</h1>
+
+    {% if cart and cart.items.all %}
+      <div class="row">
+        <!-- Cart Items -->
+        <div class="col-lg-8">
+          <div class="card mb-4">
+            <div class="card-body">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th scope="col">Product</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Quantity</th>
+                    <th scope="col">Total</th>
+                    <th scope="col"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in cart.items.all %}
+                    <tr class="cart-item" data-item-id="{{ item.id }}">
+                      <td>
+                        <div class="d-flex align-items-center">
+                          {% if item.product.primary_image %}
+                            <img src="{{ item.product.primary_image.image.url }}" alt="{{ item.product.name }}" class="img-thumbnail me-3" style="width: 60px; height: 60px; object-fit: cover;" />
+                          {% else %}
+                            <div class="bg-light text-center me-3" style="width: 60px; height: 60px;">
+                              <i class="bi bi-flower1 text-primary" style="font-size: 1.5rem; line-height: 60px;"></i>
+                            </div>
+                          {% endif %}
+                          <div>
+                            <h6 class="mb-0"><a href="{% url 'shop:product_detail' item.product.slug %}" class="text-decoration-none text-dark">{{ item.product.name }}</a></h6>
+                            {% if item.variant %}
+                              <small class="text-muted">{{ item.variant.name }}</small>
+                            {% endif %}
+                          </div>
+                        </div>
+                      </td>
+                      <td>${{ item.price }}</td>
+                      <td style="width: 130px;">
+                        <div class="input-group input-group-sm">
+                          <button type="button" class="btn btn-outline-secondary decrease-quantity">-</button>
+                          <input type="number" class="form-control text-center item-quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.stock_quantity }}" />
+                          <button type="button" class="btn btn-outline-secondary increase-quantity">+</button>
+                        </div>
+                      </td>
+                      <td class="item-subtotal">${{ item.subtotal }}</td>
+                      <td>
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-item"><i class="bi bi-trash"></i></button>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cart Summary -->
+        <div class="col-lg-4">
+          <div class="card">
+            <div class="card-header bg-primary text-white">
+              <h5 class="mb-0">Order Summary</h5>
+            </div>
+            <div class="card-body">
+              <div class="d-flex justify-content-between mb-2">
+                <span>Subtotal:</span>
+                <span class="cart-subtotal">${{ cart.total }}</span>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <span>Shipping:</span>
+                <span>Calculated at checkout</span>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <span>Tax:</span>
+                <span>Calculated at checkout</span>
+              </div>
+              <hr />
+              <div class="d-flex justify-content-between mb-4">
+                <span class="fw-bold">Estimated Total:</span>
+                <span class="fw-bold cart-total">${{ cart.total }}</span>
+              </div>
+              <div class="d-grid gap-2">
+                <a href="{% url 'shop:checkout' %}" class="btn btn-primary btn-lg">Proceed to Checkout</a>
+                <a href="{% url 'shop:product_list' %}" class="btn btn-outline-secondary">Continue Shopping</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="text-center py-5">
+        <div class="mb-4">
+          <i class="bi bi-cart text-muted" style="font-size: 5rem;"></i>
+        </div>
+        <h3>Your cart is empty</h3>
+        <p class="text-muted">Looks like you haven't added any products to your cart yet.</p>
+        <a href="{% url 'shop:product_list' %}" class="btn btn-primary mt-3">Start Shopping</a>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}
+
+{% block extra_js %}
+  {% if cart and cart.items.all %}
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const cartItems = document.querySelectorAll('.cart-item')
+        const updateUrl = "{% url 'shop:update_cart' %}"
+        const removeUrl = "{% url 'shop:remove_from_cart' %}"
+      
+        // Function to update the cart totals
+        function updateCartTotals(subtotal) {
+          document.querySelector('.cart-subtotal').textContent = '$' + subtotal
+          document.querySelector('.cart-total').textContent = '$' + subtotal
+        }
+      
+        // Handle quantity changes
+        cartItems.forEach((item) => {
+          const itemId = item.getAttribute('data-item-id')
+          const quantityInput = item.querySelector('.item-quantity')
+          const decreaseBtn = item.querySelector('.decrease-quantity')
+          const increaseBtn = item.querySelector('.increase-quantity')
+          const removeBtn = item.querySelector('.remove-item')
+          const subtotalEl = item.querySelector('.item-subtotal')
+      
+          // Decrease quantity
+          decreaseBtn.addEventListener('click', function () {
+            let value = parseInt(quantityInput.value)
+            if (value > 1) {
+              quantityInput.value = value - 1
+              updateItemQuantity(itemId, value - 1)
+            }
+          })
+      
+          // Increase quantity
+          increaseBtn.addEventListener('click', function () {
+            let value = parseInt(quantityInput.value)
+            let max = parseInt(quantityInput.getAttribute('max'))
+            if (value < max) {
+              quantityInput.value = value + 1
+              updateItemQuantity(itemId, value + 1)
+            }
+          })
+      
+          // Input change
+          quantityInput.addEventListener('change', function () {
+            let value = parseInt(this.value)
+            let min = parseInt(this.getAttribute('min'))
+            let max = parseInt(this.getAttribute('max'))
+      
+            if (value < min) {
+              this.value = min
+              value = min
+            } else if (value > max) {
+              this.value = max
+              value = max
+            }
+      
+            updateItemQuantity(itemId, value)
+          })
+      
+          // Remove item
+          removeBtn.addEventListener('click', function () {
+            if (confirm('Are you sure you want to remove this item from your cart?')) {
+              removeItem(itemId)
+            }
+          })
+      
+          // Update item quantity via AJAX
+          function updateItemQuantity(itemId, quantity) {
+            const formData = new FormData()
+            formData.append('item_id', itemId)
+            formData.append('quantity', quantity)
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}')
+      
+            fetch(updateUrl, {
+              method: 'POST',
+              body: formData,
+              headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+              }
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.status === 'success') {
+                  // Update item subtotal
+                  subtotalEl.textContent = '$' + data.item_subtotal
+      
+                  // Update cart totals
+                  updateCartTotals(data.cart_total)
+      
+                  // Update cart count in the header
+                  const cartCount = document.querySelector('.cart-count')
+                  if (cartCount) {
+                    cartCount.textContent = data.cart_count
+                  }
+                } else {
+                  alert(data.message || 'Error updating cart')
+                }
+              })
+              .catch((error) => {
+                console.error('Error:', error)
+              })
+          }
+      
+          // Remove item via AJAX
+          function removeItem(itemId) {
+            const formData = new FormData()
+            formData.append('item_id', itemId)
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}')
+      
+            fetch(removeUrl, {
+              method: 'POST',
+              body: formData,
+              headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+              }
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.status === 'success') {
+                  // Remove the item from the DOM
+                  item.remove()
+      
+                  // Update cart totals
+                  updateCartTotals(data.cart_total)
+      
+                  // Update cart count in the header
+                  const cartCount = document.querySelector('.cart-count')
+                  if (cartCount) {
+                    cartCount.textContent = data.cart_count
+                  }
+      
+                  // Reload the page if no items left
+                  if (data.cart_count === 0) {
+                    location.reload()
+                  }
+                } else {
+                  alert(data.message || 'Error removing item')
+                }
+              })
+              .catch((error) => {
+                console.error('Error:', error)
+              })
+          }
+        })
+      })
+    </script>
+  {% endif %}
+{% endblock %}

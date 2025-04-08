@@ -1,0 +1,455 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load shop_filters %}
+
+{% block title %}Checkout - Bloom{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <h1 class="mb-4">Checkout</h1>
+  
+  {% if cart and cart.items.all %}
+    <form method="post" id="checkout-form">
+      {% csrf_token %}
+      <input type="hidden" id="id_shipping_cost" name="shipping_cost" value="0">
+      <input type="hidden" id="id_tax_amount" name="tax_amount" value="0">
+      <input type="hidden" id="id_total_amount" name="total_amount" value="{{ cart.total }}">
+      
+      <div class="row">
+        <!-- Checkout Form -->
+        <div class="col-lg-8">
+          <div class="card mb-4">
+            <div class="card-header bg-white">
+              <h5 class="mb-0">Contact Information</h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="id_email" class="form-label">Email Address *</label>
+                  <input type="email" class="form-control" id="id_email" name="email" required {% if user.is_authenticated %}value="{{ user.email }}"{% endif %}>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="id_phone" class="form-label">Phone Number *</label>
+                  <input type="tel" class="form-control" id="id_phone" name="phone" required>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card mb-4">
+            <div class="card-header bg-white">
+              <h5 class="mb-0">Shipping Information</h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="id_shipping_first_name" class="form-label">First Name *</label>
+                  <input type="text" class="form-control" id="id_shipping_first_name" name="shipping_first_name" required {% if user.is_authenticated %}value="{{ user.first_name }}"{% endif %}>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="id_shipping_last_name" class="form-label">Last Name *</label>
+                  <input type="text" class="form-control" id="id_shipping_last_name" name="shipping_last_name" required {% if user.is_authenticated %}value="{{ user.last_name }}"{% endif %}>
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="id_shipping_address" class="form-label">Address *</label>
+                <input type="text" class="form-control" id="id_shipping_address" name="shipping_address" required>
+              </div>
+              
+              <div class="mb-3">
+                <label for="id_shipping_address2" class="form-label">Apartment, suite, etc. (optional)</label>
+                <input type="text" class="form-control" id="id_shipping_address2" name="shipping_address2">
+              </div>
+              
+              <div class="row">
+                <div class="col-md-4 mb-3">
+                  <label for="id_shipping_city" class="form-label">City *</label>
+                  <input type="text" class="form-control" id="id_shipping_city" name="shipping_city" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label for="id_shipping_state" class="form-label">State/Province *</label>
+                  <input type="text" class="form-control" id="id_shipping_state" name="shipping_state" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label for="id_shipping_zip" class="form-label">Zip/Postal Code *</label>
+                  <input type="text" class="form-control" id="id_shipping_zip" name="shipping_zip" required>
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="id_shipping_country" class="form-label">Country *</label>
+                <select class="form-select" id="id_shipping_country" name="shipping_country" required>
+                  <option value="">Select a country</option>
+                  <option value="US">United States</option>
+                  <option value="CA">Canada</option>
+                  <option value="UK">United Kingdom</option>
+                  <!-- Add more countries as needed -->
+                </select>
+              </div>
+              
+              <div class="mb-3">
+                <label for="id_delivery_notes" class="form-label">Delivery Notes (optional)</label>
+                <textarea class="form-control" id="id_delivery_notes" name="delivery_notes" rows="2"></textarea>
+                <div class="form-text">Special instructions for delivery, gate codes, etc.</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card mb-4">
+            <div class="card-header bg-white">
+              <h5 class="mb-0">Billing Information</h5>
+            </div>
+            <div class="card-body">
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="same_as_shipping" checked>
+                <label class="form-check-label" for="same_as_shipping">
+                  Same as shipping address
+                </label>
+              </div>
+              
+              <div id="billing-address-form" style="display: none;">
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="id_billing_first_name" class="form-label">First Name *</label>
+                    <input type="text" class="form-control" id="id_billing_first_name" name="billing_first_name">
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="id_billing_last_name" class="form-label">Last Name *</label>
+                    <input type="text" class="form-control" id="id_billing_last_name" name="billing_last_name">
+                  </div>
+                </div>
+                
+                <div class="mb-3">
+                  <label for="id_billing_address" class="form-label">Address *</label>
+                  <input type="text" class="form-control" id="id_billing_address" name="billing_address">
+                </div>
+                
+                <div class="mb-3">
+                  <label for="id_billing_address2" class="form-label">Apartment, suite, etc. (optional)</label>
+                  <input type="text" class="form-control" id="id_billing_address2" name="billing_address2">
+                </div>
+                
+                <div class="row">
+                  <div class="col-md-4 mb-3">
+                    <label for="id_billing_city" class="form-label">City *</label>
+                    <input type="text" class="form-control" id="id_billing_city" name="billing_city">
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label for="id_billing_state" class="form-label">State/Province *</label>
+                    <input type="text" class="form-control" id="id_billing_state" name="billing_state">
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label for="id_billing_zip" class="form-label">Zip/Postal Code *</label>
+                    <input type="text" class="form-control" id="id_billing_zip" name="billing_zip">
+                  </div>
+                </div>
+                
+                <div class="mb-3">
+                  <label for="id_billing_country" class="form-label">Country *</label>
+                  <select class="form-select" id="id_billing_country" name="billing_country">
+                    <option value="">Select a country</option>
+                    <option value="US">United States</option>
+                    <option value="CA">Canada</option>
+                    <option value="UK">United Kingdom</option>
+                    <!-- Add more countries as needed -->
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card mb-4">
+            <div class="card-header bg-white">
+              <h5 class="mb-0">Payment Information</h5>
+            </div>
+            <div class="card-body">
+              <div class="mb-3">
+                <label class="form-label">Payment Method *</label>
+                <div class="form-check mb-2">
+                  <input class="form-check-input" type="radio" name="payment_method" id="payment_method_credit" value="credit" checked>
+                  <label class="form-check-label" for="payment_method_credit">
+                    Credit Card
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="payment_method" id="payment_method_paypal" value="paypal">
+                  <label class="form-check-label" for="payment_method_paypal">
+                    PayPal
+                  </label>
+                </div>
+              </div>
+              
+              <div id="credit-card-form">
+                <div class="mb-3">
+                  <label for="id_card_number" class="form-label">Card Number *</label>
+                  <input type="text" class="form-control" id="id_card_number" name="card_number" placeholder="•••• •••• •••• ••••">
+                </div>
+                
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="id_expiration" class="form-label">Expiration Date *</label>
+                    <input type="text" class="form-control" id="id_expiration" name="expiration" placeholder="MM/YY">
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="id_cvv" class="form-label">CVV *</label>
+                    <input type="text" class="form-control" id="id_cvv" name="cvv" placeholder="123">
+                  </div>
+                </div>
+                
+                <div class="mb-3">
+                  <label for="id_name_on_card" class="form-label">Name on Card *</label>
+                  <input type="text" class="form-control" id="id_name_on_card" name="name_on_card">
+                </div>
+              </div>
+              
+              <div id="paypal-form" style="display: none;">
+                <p class="text-muted">You will be redirected to PayPal to complete your payment after reviewing your order.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Order Summary -->
+        <div class="col-lg-4">
+          <div class="card position-sticky" style="top: 2rem;">
+            <div class="card-header bg-primary text-white">
+              <h5 class="mb-0">Order Summary</h5>
+            </div>
+            <div class="card-body">
+              <ul class="list-group list-group-flush mb-3">
+                {% for item in cart.items.all %}
+                <li class="list-group-item d-flex justify-content-between lh-sm py-3">
+                  <div>
+                    <h6 class="mb-0">{{ item.product.name }}{% if item.variant %} - {{ item.variant.name }}{% endif %}</h6>
+                    <small class="text-muted">Qty: {{ item.quantity }}</small>
+                  </div>
+                  <span>${{ item.subtotal }}</span>
+                </li>
+                {% endfor %}
+              </ul>
+              
+              <div class="d-flex justify-content-between mb-2">
+                <span>Subtotal:</span>
+                <span>${{ cart.total }}</span>
+              </div>
+              
+              <div class="d-flex justify-content-between mb-2">
+                <span>Shipping:</span>
+                <span id="shipping-cost">$0.00</span>
+              </div>
+              
+              <div class="d-flex justify-content-between mb-3">
+                <span>Tax:</span>
+                <span id="tax-amount">$0.00</span>
+              </div>
+              
+              {% if coupon %}
+              <div class="d-flex justify-content-between mb-3 text-success">
+                <span>Discount ({{ coupon.code }}):</span>
+                <span id="discount-amount">-${{ discount_amount }}</span>
+              </div>
+              {% endif %}
+              
+              <hr>
+              
+              <div class="d-flex justify-content-between mb-4">
+                <span class="fw-bold">Total:</span>
+                <span class="fw-bold" id="order-total">
+                  {% if coupon %}
+                    ${{ total_after_discount|floatformat:2 }}
+                  {% else %}
+                    ${{ cart.total }}
+                  {% endif %}
+                </span>
+              </div>
+              
+              <div class="mb-3">
+                <label for="id_coupon" class="form-label">Coupon Code</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="id_coupon" name="coupon" {% if coupon %}value="{{ coupon.code }}" readonly{% endif %}>
+                  <button class="btn btn-outline-primary" type="button" id="apply-coupon" {% if coupon %}disabled{% endif %}>
+                    {% if coupon %}Applied{% else %}Apply{% endif %}
+                  </button>
+                </div>
+                {% if coupon %}
+                <div class="form-text text-success">Coupon applied successfully!</div>
+                {% endif %}
+              </div>
+              
+              <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-lg">Place Order</button>
+              </div>
+              
+              <div class="mt-3 text-center">
+                <small class="text-muted">By placing your order, you agree to our <a href="#">Terms & Conditions</a> and <a href="#">Privacy Policy</a>.</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  {% else %}
+    <div class="text-center py-5">
+      <div class="mb-4">
+        <i class="bi bi-cart-x text-muted" style="font-size: 5rem;"></i>
+      </div>
+      <h3>Your cart is empty</h3>
+      <p class="text-muted">You need to add items to your cart before checking out.</p>
+      <a href="{% url 'shop:product_list' %}" class="btn btn-primary mt-3">Start Shopping</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if cart and cart.items.all %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Toggle billing address form
+    const sameAsShippingCheckbox = document.getElementById('same_as_shipping');
+    const billingAddressForm = document.getElementById('billing-address-form');
+    
+    sameAsShippingCheckbox.addEventListener('change', function() {
+      if (this.checked) {
+        billingAddressForm.style.display = 'none';
+        // Clear required attributes when hidden
+        document.querySelectorAll('#billing-address-form input, #billing-address-form select').forEach(input => {
+          input.required = false;
+        });
+      } else {
+        billingAddressForm.style.display = 'block';
+        // Add required attributes when visible
+        document.querySelectorAll('#billing-address-form input, #billing-address-form select').forEach(input => {
+          if (input.id !== 'id_billing_address2') {
+            input.required = true;
+          }
+        });
+      }
+    });
+    
+    // Toggle payment method forms
+    const paymentMethodRadios = document.querySelectorAll('input[name="payment_method"]');
+    const creditCardForm = document.getElementById('credit-card-form');
+    const paypalForm = document.getElementById('paypal-form');
+    
+    paymentMethodRadios.forEach(radio => {
+      radio.addEventListener('change', function() {
+        if (this.value === 'credit') {
+          creditCardForm.style.display = 'block';
+          paypalForm.style.display = 'none';
+          // Add required attributes to credit card fields
+          document.querySelectorAll('#credit-card-form input').forEach(input => {
+            input.required = true;
+          });
+        } else if (this.value === 'paypal') {
+          creditCardForm.style.display = 'none';
+          paypalForm.style.display = 'block';
+          // Remove required attributes from credit card fields
+          document.querySelectorAll('#credit-card-form input').forEach(input => {
+            input.required = false;
+          });
+        }
+      });
+    });
+    
+    // Calculate shipping and taxes
+    const shippingCountry = document.getElementById('id_shipping_country');
+    const shippingState = document.getElementById('id_shipping_state');
+    const shippingCost = document.getElementById('shipping-cost');
+    const taxAmount = document.getElementById('tax-amount');
+    const orderTotal = document.getElementById('order-total');
+    const subtotal = {{ cart.total }};
+    let discountAmount = {% if discount_amount %}{{ discount_amount }}{% else %}0{% endif %};
+    
+    function updateTotals() {
+      const country = shippingCountry.value;
+      let shipping = 0;
+      let tax = 0;
+      
+      // Simple logic for demonstration - replace with actual calculation
+      if (country === 'US') {
+        shipping = 5.99;
+        tax = subtotal * 0.07; // 7% tax rate for US
+      } else if (country === 'CA') {
+        shipping = 9.99;
+        tax = subtotal * 0.13; // 13% tax rate for Canada
+      } else if (country === 'UK') {
+        shipping = 14.99;
+        tax = subtotal * 0.20; // 20% VAT for UK
+      }
+      
+      shippingCost.textContent = '$' + shipping.toFixed(2);
+      taxAmount.textContent = '$' + tax.toFixed(2);
+      
+      const total = subtotal + shipping + tax - discountAmount;
+      orderTotal.textContent = '$' + total.toFixed(2);
+      
+      // Add hidden fields for form submission
+      document.getElementById('id_shipping_cost').value = shipping.toFixed(2);
+      document.getElementById('id_tax_amount').value = tax.toFixed(2);
+      document.getElementById('id_total_amount').value = total.toFixed(2);
+    }
+    
+    // Call updateTotals on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      updateTotals();
+    });
+    
+    shippingCountry.addEventListener('change', updateTotals);
+    shippingState.addEventListener('change', updateTotals);
+    
+    // Apply coupon
+    const couponInput = document.getElementById('id_coupon');
+    const applyCouponButton = document.getElementById('apply-coupon');
+    
+    applyCouponButton.addEventListener('click', function() {
+      const couponCode = couponInput.value.trim();
+      
+      if (couponCode) {
+        // This would normally be an AJAX call to validate the coupon
+        fetch('/shop/apply-coupon/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: JSON.stringify({
+            coupon_code: couponCode
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success') {
+            alert('Coupon applied successfully!');
+            // Update totals based on coupon discount
+            updateTotals();
+          } else {
+            alert(data.message || 'Invalid coupon code');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Error applying coupon');
+        });
+      } else {
+        alert('Please enter a coupon code');
+      }
+    });
+    
+    // Form validation
+    const checkoutForm = document.getElementById('checkout-form');
+    
+    checkoutForm.addEventListener('submit', function(event) {
+      event.preventDefault();
+      
+      // This would normally validate the form and submit it
+      alert('Order placed successfully! This is just a demo. In a real application, this would submit the order and redirect to a confirmation page.');
+      
+      // Redirect to a confirmation page
+      // window.location.href = "{% url 'shop:order_confirmation' %}";
+    });
+  });
+</script>
+{% endif %}
+{% endblock %} 

@@ -1,0 +1,87 @@
+{% extends 'bloom/base.html' %}
+
+{% block title %}
+  {{ product.name }} - Bloom Admin
+{% endblock %}
+
+{% block bloom_content %}
+  <div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1 class="h2">Product Details</h1>
+      <div>
+        <a href="{% url 'bloom:product_update' product.id %}" class="btn btn-primary"><i class="bi bi-pencil me-1"></i>Edit</a>
+        <a href="{% url 'bloom:product_delete' product.id %}" class="btn btn-outline-danger ms-2"><i class="bi bi-trash me-1"></i>Delete</a>
+        <a href="{% url 'bloom:product_list' %}" class="btn btn-outline-secondary ms-2"><i class="bi bi-arrow-left me-1"></i>Back to Products</a>
+      </div>
+    </div>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <div class="row">
+      <div class="col-md-8">
+        <div class="card shadow-sm mb-4">
+          <div class="card-header bg-white">
+            <h5 class="mb-0">Basic Information</h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <dl>
+                  <dt>Name</dt>
+                  <dd>{{ product.name }}</dd>
+
+                  <dt>SKU</dt>
+                  <dd>{{ product.sku }}</dd>
+
+                  <dt>Price</dt>
+                  <dd>${{ product.price }}</dd>
+                </dl>
+              </div>
+              <div class="col-md-6">
+                <dl>
+                  <dt>Type</dt>
+                  <dd>{{ product.product_type|default:'Not specified' }}</dd>
+
+                  <dt>Created</dt>
+                  <dd>{{ product.created_at|date:'M d, Y' }}</dd>
+
+                  <dt>Last Updated</dt>
+                  <dd>{{ product.updated_at|date:'M d, Y' }}</dd>
+                </dl>
+              </div>
+            </div>
+
+            <dt>Description</dt>
+            <dd>{{ product.description|linebreaks }}</dd>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card shadow-sm mb-4">
+          <div class="card-header bg-white">
+            <h5 class="mb-0">Occasions</h5>
+          </div>
+          <div class="card-body">
+            {% if product.occasions.all %}
+              <ul class="list-group">
+                {% for occasion in product.occasions.all %}
+                  <li class="list-group-item">{{ occasion.name }}</li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p class="text-muted">No occasions associated with this product.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
