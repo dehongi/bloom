@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Order #{{ order.order_number }} - Bloom Floral & Gifts
+{% endblock %}
+
+{% block content %}
+  <div class="container py-5">
+    <div class="row">
+      <div class="col-lg-10 mx-auto">
+        <!-- Order Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h1 class="h3 mb-0">Order #{{ order.order_number }}</h1>
+          <a href="{% url 'shop:order_list' %}" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-2"></i>Back to Orders</a>
+        </div>
+
+        <!-- Order Status -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <div class="row align-items-center">
+              <div class="col-md-6">
+                <h2 class="h5 mb-1">Order Placed on {{ order.created_at|date:'F j, Y' }}</h2>
+                <p class="text-muted mb-0">Thank you for your order!</p>
+              </div>
+              <div class="col-md-6 text-md-end">
+                <div class="mb-2">
+                  <span class="fw-bold me-2">Order Status:</span>
+                  <span class="badge rounded-pill 
+                    {% if order.status == 'pending' %}
+                      
+                      bg-secondary
+
+                    {% elif order.status == 'processing' %}
+                      
+                      bg-primary
+
+                    {% elif order.status == 'shipped' %}
+                      
+                      bg-info
+
+                    {% elif order.status == 'delivered' %}
+                      
+                      bg-success
+
+                    {% else %}
+                      
+                      bg-danger
+
+                    {% endif %}">
+                    {{ order.get_status_display }}
+                  </span>
+                </div>
+                <div>
+                  <span class="fw-bold me-2">Payment Status:</span>
+                  <span class="badge rounded-pill 
+                    {% if order.payment_status == 'paid' %}
+                      
+                      bg-success
+
+                    {% elif order.payment_status == 'pending' %}
+                      
+                      bg-warning
+
+                    {% elif order.payment_status == 'refunded' %}
+                      
+                      bg-info
+
+                    {% else %}
+                      
+                      bg-danger
+
+                    {% endif %}">
+                    {{ order.get_payment_status_display }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Details and Shipping -->
+        <div class="row mb-4">
+          <!-- Order Details -->
+          <div class="col-md-6 mb-4 mb-md-0">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-header bg-white">
+                <h3 class="h5 mb-0"><i class="bi bi-info-circle me-2"></i>Order Details</h3>
+              </div>
+              <div class="card-body p-4">
+                <ul class="list-unstyled mb-0">
+                  <li class="mb-2">
+                    <strong>Order Number:</strong> {{ order.order_number }}
+                  </li>
+                  <li class="mb-2">
+                    <strong>Order Date:</strong> {{ order.created_at|date:'F j, Y' }}
+                  </li>
+                  <li class="mb-2">
+                    <strong>Email:</strong> {{ order.email }}
+                  </li>
+                  <li class="mb-2">
+                    <strong>Phone:</strong> {{ order.phone }}
+                  </li>
+                  {% if order.tracking_number %}
+                    <li class="mb-2">
+                      <strong>Tracking Number:</strong> {{ order.tracking_number }}
+                    </li>
+                  {% endif %}
+                  {% if order.order_notes %}
+                    <li class="mb-2">
+                      <strong>Order Notes:</strong> {{ order.order_notes }}
+                    </li>
+                  {% endif %}
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Shipping Information -->
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-header bg-white">
+                <h3 class="h5 mb-0"><i class="bi bi-truck me-2"></i>Shipping Information</h3>
+              </div>
+              <div class="card-body p-4">
+                <ul class="list-unstyled mb-0">
+                  <li class="mb-2">
+                    <strong>Name:</strong> {{ order.full_name }}
+                  </li>
+                  <li class="mb-2">
+                    <strong>Address:</strong><br />
+                    {{ order.address_line_1 }}<br />
+                    {% if order.address_line_2 %}
+                      {{ order.address_line_2 }}<br />
+                    {% endif %}
+                    {{ order.city }}, {{ order.state }} {{ order.postal_code }}<br />
+                    {{ order.country }}
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Items -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-header bg-white">
+            <h3 class="h5 mb-0"><i class="bi bi-box-seam me-2"></i>Order Items</h3>
+          </div>
+          <div class="card-body p-4">
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th class="text-end">Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in order.items.all %}
+                    <tr>
+                      <td>
+                        {{ item.product_name }}
+                        {% if item.variant_name %}
+                          <span class="text-muted">- {{ item.variant_name }}</span>
+                        {% endif %}
+                      </td>
+                      <td>${{ item.price }}</td>
+                      <td>{{ item.quantity }}</td>
+                      <td class="text-end">${{ item.subtotal }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+                <tfoot class="table-light">
+                  <tr>
+                    <td colspan="3" class="text-end">
+                      <strong>Subtotal:</strong>
+                    </td>
+                    <td class="text-end">${{ order.subtotal }}</td>
+                  </tr>
+                  {% if order.discount_amount > 0 %}
+                    <tr>
+                      <td colspan="3" class="text-end">
+                        <strong>Discount:</strong>
+                      </td>
+                      <td class="text-end">-${{ order.discount_amount }}</td>
+                    </tr>
+                  {% endif %}
+                  {% if order.shipping_cost > 0 %}
+                    <tr>
+                      <td colspan="3" class="text-end">
+                        <strong>Shipping:</strong>
+                      </td>
+                      <td class="text-end">${{ order.shipping_cost }}</td>
+                    </tr>
+                  {% endif %}
+                  {% if order.tax_amount > 0 %}
+                    <tr>
+                      <td colspan="3" class="text-end">
+                        <strong>Tax:</strong>
+                      </td>
+                      <td class="text-end">${{ order.tax_amount }}</td>
+                    </tr>
+                  {% endif %}
+                  <tr>
+                    <td colspan="3" class="text-end">
+                      <strong>Total:</strong>
+                    </td>
+                    <td class="text-end fw-bold">${{ order.total }}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Action Buttons -->
+        <div class="text-center">
+          <a href="{% url 'shop:order_list' %}" class="btn btn-outline-primary me-2"><i class="bi bi-list me-2"></i>My Orders</a>
+          <a href="{% url 'shop:product_list' %}" class="btn btn-primary"><i class="bi bi-shop me-2"></i>Continue Shopping</a>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

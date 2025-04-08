@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  My Orders - Bloom Floral & Gifts
+{% endblock %}
+
+{% block content %}
+  <div class="container py-5">
+    <div class="row">
+      <div class="col-lg-10 mx-auto">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <h1 class="h3 mb-4">My Orders</h1>
+
+            {% if orders %}
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Order #</th>
+                      <th>Date</th>
+                      <th>Status</th>
+                      <th>Payment</th>
+                      <th>Total</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for order in orders %}
+                      <tr>
+                        <td>
+                          <a href="{% url 'shop:order_detail' order_number=order.order_number %}" class="text-decoration-none">{{ order.order_number }}</a>
+                        </td>
+                        <td>{{ order.created_at|date:'M d, Y' }}</td>
+                        <td>
+                          <span class="badge rounded-pill 
+                            {% if order.status == 'pending' %}
+                              
+                              bg-secondary
+
+                            {% elif order.status == 'processing' %}
+                              
+                              bg-primary
+
+                            {% elif order.status == 'shipped' %}
+                              
+                              bg-info
+
+                            {% elif order.status == 'delivered' %}
+                              
+                              bg-success
+
+                            {% else %}
+                              
+                              bg-danger
+
+                            {% endif %}">
+                            {{ order.get_status_display }}
+                          </span>
+                        </td>
+                        <td>
+                          <span class="badge rounded-pill 
+                            {% if order.payment_status == 'paid' %}
+                              
+                              bg-success
+
+                            {% elif order.payment_status == 'pending' %}
+                              
+                              bg-warning
+
+                            {% elif order.payment_status == 'refunded' %}
+                              
+                              bg-info
+
+                            {% else %}
+                              
+                              bg-danger
+
+                            {% endif %}">
+                            {{ order.get_payment_status_display }}
+                          </span>
+                        </td>
+                        <td>${{ order.total }}</td>
+                        <td>
+                          <a href="{% url 'shop:order_detail' order_number=order.order_number %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye me-1"></i>View</a>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Pagination -->
+              {% if is_paginated %}
+                <nav aria-label="Page navigation" class="mt-4">
+                  <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                      <li class="page-item">
+                        <a class="page-link" href="?page=1">&laquo; First</a>
+                      </li>
+                      <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                      </li>
+                    {% endif %}
+
+                    <li class="page-item disabled">
+                      <a class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</a>
+                    </li>
+
+                    {% if page_obj.has_next %}
+                      <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                      </li>
+                      <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+                      </li>
+                    {% endif %}
+                  </ul>
+                </nav>
+              {% endif %}
+            {% else %}
+              <div class="text-center py-5">
+                <i class="bi bi-bag-x text-muted" style="font-size: 4rem;"></i>
+                <h3 class="h4 mt-3">No Orders Yet</h3>
+                <p class="text-muted">You haven't placed any orders yet.</p>
+                <a href="{% url 'shop:product_list' %}" class="btn btn-primary mt-3"><i class="bi bi-shop me-2"></i>Continue Shopping</a>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
