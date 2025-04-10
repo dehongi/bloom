@@ -5,7 +5,7 @@
         "fields": {
             "coupon": 4,
             "user": 1,
-            "order": 1,
+            "order": null,
             "used_at": "2023-03-15T14:30:00Z"
         }
     },
@@ -15,7 +15,7 @@
         "fields": {
             "coupon": 2,
             "user": 2,
-            "order": 2,
+            "order": null,
             "used_at": "2023-06-22T09:45:00Z"
         }
     },
@@ -25,7 +25,7 @@
         "fields": {
             "coupon": 3,
             "user": 1,
-            "order": 3,
+            "order": null,
             "used_at": "2023-07-10T16:20:00Z"
         }
     },
@@ -35,7 +35,7 @@
         "fields": {
             "coupon": 2,
             "user": 3,
-            "order": 4,
+            "order": null,
             "used_at": "2023-07-15T11:30:00Z"
         }
     },
@@ -45,7 +45,7 @@
         "fields": {
             "coupon": 7,
             "user": 2,
-            "order": 5,
+            "order": null,
             "used_at": "2023-09-05T19:15:00Z"
         }
     }

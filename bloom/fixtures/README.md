@@ -50,6 +50,10 @@ When loading all fixtures, it's important to maintain the proper order due to de
 12. `coupons.json` (Coupon model)
 13. `coupon_usages.json` (CouponUsage model - depends on coupons, users, and orders)
 
+## Important Notes
+
+- **CouponUsage Order Field**: The `order` field in `coupon_usages.json` is intentionally set to `null` because the `shop.couponusage` model cannot directly reference orders from the `bloom.order` model as they are in different apps.
+
 ## Password for User Accounts
 
 All sample user accounts use the password: `password123`
