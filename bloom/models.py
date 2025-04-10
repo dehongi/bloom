@@ -2,6 +2,9 @@ from django.db import models
 from django.utils import timezone
 from accounts.models import CustomUser
 
+# Import shop Order model for integration
+# from shop.models import Order as ShopOrder
+
 
 class Customer(models.Model):
     user = models.OneToOneField(
@@ -19,6 +22,53 @@ class Customer(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Employee(models.Model):
+    ROLE_CHOICES = [
+        ("manager", "Manager"),
+        ("designer", "Designer"),
+        ("arranger", "Flower Arranger"),
+        ("delivery", "Delivery Personnel"),
+        ("sales", "Sales Associate"),
+        ("customer_service", "Customer Service"),
+    ]
+
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+    department = models.CharField(max_length=50, blank=True)
+    hire_date = models.DateField(default=timezone.now)
+    phone_extension = models.CharField(max_length=10, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    # Permissions and capabilities
+    can_process_orders = models.BooleanField(default=False)
+    can_arrange_flowers = models.BooleanField(default=False)
+    can_deliver_orders = models.BooleanField(default=False)
+    can_manage_staff = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.get_full_name()} - {self.get_role_display()}"
+
+    def save(self, *args, **kwargs):
+        # Set default permissions based on role
+        if self.role == "manager":
+            self.can_process_orders = True
+            self.can_manage_staff = True
+        elif self.role == "designer":
+            self.can_process_orders = True
+            self.can_arrange_flowers = True
+        elif self.role == "arranger":
+            self.can_arrange_flowers = True
+        elif self.role == "delivery":
+            self.can_deliver_orders = True
+        elif self.role == "sales":
+            self.can_process_orders = True
+
+        super().save(*args, **kwargs)
 
 
 class Occasion(models.Model):
@@ -43,6 +93,15 @@ class Product(models.Model):
     product_type = models.ForeignKey(ProductType, on_delete=models.SET_NULL, null=True)
     external_id = models.CharField(max_length=50, blank=True, null=True)
     occasions = models.ManyToManyField(Occasion, blank=True)
+
+    # Reference to corresponding shop product
+    shop_product = models.OneToOneField(
+        "shop.Product",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="bloom_product_link",
+    )
 
     def __str__(self):
         return f"{self.name} (SKU: {self.sku})"
@@ -75,7 +134,43 @@ class Order(models.Model):
     delivery_method = models.ForeignKey(
         DeliveryMethod, on_delete=models.SET_NULL, null=True
     )
+
+    # Reference to the corresponding shop order (using string reference)
+    shop_order = models.OneToOneField(
+        "shop.Order",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="bloom_order_link",
+    )
+
     shipping_charge = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    # Staff assignments
+    assigned_designer = models.ForeignKey(
+        Employee,
+        related_name="design_orders",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        limit_choices_to={"can_arrange_flowers": True},
+    )
+    assigned_delivery = models.ForeignKey(
+        Employee,
+        related_name="delivery_orders",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        limit_choices_to={"can_deliver_orders": True},
+    )
+    processed_by = models.ForeignKey(
+        Employee,
+        related_name="processed_orders",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        limit_choices_to={"can_process_orders": True},
+    )
 
     # Address information
     recipient_name = models.CharField(max_length=100, blank=True)
@@ -162,6 +257,9 @@ class OrderStatus(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     notes = models.TextField(blank=True)
     updated_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
+    updated_by_employee = models.ForeignKey(
+        Employee, on_delete=models.SET_NULL, null=True, blank=True
+    )
 
     class Meta:
         ordering = ["-timestamp"]
@@ -169,3 +267,32 @@ class OrderStatus(models.Model):
 
     def __str__(self):
         return f"{self.order.reference_number} - {self.status}"
+
+
+class EmployeeOrderAssignment(models.Model):
+    """Track the history of employee assignments to orders"""
+
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    role = models.CharField(max_length=20, choices=Employee.ROLE_CHOICES)
+    assigned_at = models.DateTimeField(auto_now_add=True)
+    assigned_by = models.ForeignKey(
+        Employee, related_name="made_assignments", on_delete=models.SET_NULL, null=True
+    )
+    completed = models.BooleanField(default=False)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-assigned_at"]
+        unique_together = ("employee", "order", "completed")
+
+    def __str__(self):
+        status = "Completed" if self.completed else "Active"
+        return f"{self.employee} - {self.order.reference_number} - {self.get_role_display()} ({status})"
+
+    def complete_assignment(self, notes=""):
+        self.completed = True
+        self.completed_at = timezone.now()
+        self.notes = notes
+        self.save()

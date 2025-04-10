@@ -26,6 +26,7 @@
           <a href="{% url 'bloom:order_list' %}" class="list-group-item list-group-item-action {% if 'order' in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-bag me-2"></i>Orders</a>
           <a href="{% url 'bloom:product_list' %}" class="list-group-item list-group-item-action {% if 'product' in request.resolver_match.url_name and 'type' not in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-box-seam me-2"></i>Products</a>
           <a href="{% url 'bloom:customer_list' %}" class="list-group-item list-group-item-action {% if 'customer' in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-people me-2"></i>Customers</a>
+          <a href="{% url 'bloom:employee_list' %}" class="list-group-item list-group-item-action {% if 'employee' in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-person-badge me-2"></i>Employees</a>
           <div class="list-group-item list-group-item-action fw-bold">Settings</div>
           <a href="{% url 'bloom:occasion_list' %}" class="list-group-item list-group-item-action {% if 'occasion' in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-calendar-event me-2"></i>Occasions</a>
           <a href="{% url 'bloom:product_type_list' %}" class="list-group-item list-group-item-action {% if 'product_type' in request.resolver_match.url_name %}active{% endif %}"><i class="bi bi-tags me-2"></i>Product Types</a>

@@ -1,0 +1,86 @@
+{% extends 'bloom/base.html' %}
+{% load static %}
+
+{% block title %}
+  Assign Employee to Order - Bloom
+{% endblock %}
+
+{% block bloom_content %}
+  <div class="container my-4">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card shadow-sm">
+          <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Assign Employee to Order #{{ order.reference_number }}</h4>
+          </div>
+          <div class="card-body">
+            <form method="post">
+              {% csrf_token %}
+
+              <div class="mb-3">
+                <label for="{{ form.role.id_for_label }}" class="form-label">Role</label>
+                {{ form.role }}
+                {% if form.role.errors %}
+                  <div class="invalid-feedback d-block">{{ form.role.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="mb-3">
+                <label for="{{ form.employee.id_for_label }}" class="form-label">Employee</label>
+                {{ form.employee }}
+                {% if form.employee.errors %}
+                  <div class="invalid-feedback d-block">{{ form.employee.errors }}</div>
+                {% endif %}
+                <div class="form-text" id="employee-filter-help">Employees will be filtered based on selected role and capabilities.</div>
+              </div>
+
+              <div class="mb-3">
+                <label for="{{ form.notes.id_for_label }}" class="form-label">Assignment Notes</label>
+                {{ form.notes }}
+                {% if form.notes.errors %}
+                  <div class="invalid-feedback d-block">{{ form.notes.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="{% url 'bloom:order_detail' order.pk %}" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i> Cancel</a>
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Assign Employee</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra_js %}
+  <script>
+    // Simple script to filter employees based on role
+    document.addEventListener('DOMContentLoaded', function () {
+      const roleSelector = document.querySelector('.role-selector')
+      const employeeSelect = document.getElementById('{{ form.employee.id_for_label }}')
+    
+      if (roleSelector && employeeSelect) {
+        roleSelector.addEventListener('change', function () {
+          const selectedRole = this.value
+    
+          // Get the right filter attribute based on role
+          let filterAttribute = ''
+          if (selectedRole === 'designer') {
+            filterAttribute = this.getAttribute('data-designer-filter')
+          } else if (selectedRole === 'delivery') {
+            filterAttribute = this.getAttribute('data-delivery-filter')
+          } else if (selectedRole === 'manager' || selectedRole === 'sales') {
+            filterAttribute = this.getAttribute('data-processor-filter')
+          }
+    
+          // Make AJAX request to get filtered employees
+          // This is a placeholder - in a real implementation you would fetch from the server
+          // For now we'll just add a helper message
+          document.getElementById('employee-filter-help').textContent = `Showing employees with ${filterAttribute} capability`
+        })
+      }
+    })
+  </script>
+{% endblock %}

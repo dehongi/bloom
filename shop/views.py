@@ -449,6 +449,10 @@ def checkout_confirm(request):
     # Clear cart
     cart.items.all().delete()
 
+    # Note: A corresponding bloom order will be automatically created via the post_save signal
+    # The signal handler in shop/signals.py will create a bloom.Order record linked to this order
+    # and populate it with customer and item data for internal processing
+
     # Redirect to success page
     return redirect("shop:order_success", order_number=order.order_number)
 

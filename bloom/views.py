@@ -11,7 +11,7 @@ from django.views.generic import (
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Count
 from django.forms import inlineformset_factory
 from django.http import JsonResponse, HttpResponseRedirect
 from django.utils import timezone
@@ -26,6 +26,8 @@ from .models import (
     OrderItem,
     CustomField,
     OrderStatus,
+    Employee,
+    EmployeeOrderAssignment,
 )
 from .forms import (
     CustomerForm,
@@ -40,6 +42,9 @@ from .forms import (
     OrderSearchForm,
     ProductSearchForm,
     OrderItemFormSet,
+    EmployeeForm,
+    EmployeeSearchForm,
+    EmployeeOrderAssignmentForm,
 )
 
 
@@ -371,6 +376,17 @@ class OrderDetailView(LoginRequiredMixin, DetailView):
         context["custom_fields"] = CustomField.objects.filter(order=self.object)
         context["status_history"] = OrderStatus.objects.filter(order=self.object)
         context["status_form"] = OrderStatusForm(initial={"status": self.object.status})
+
+        # Add employee information to context
+        context["designers"] = Employee.objects.filter(can_arrange_flowers=True)
+        context["delivery_staff"] = Employee.objects.filter(can_deliver_orders=True)
+        context["processors"] = Employee.objects.filter(can_process_orders=True)
+
+        # Get assignment history for this order
+        context["employee_assignments"] = EmployeeOrderAssignment.objects.filter(
+            order=self.object
+        ).select_related("employee", "assigned_by")
+
         return context
 
 
@@ -519,9 +535,20 @@ class UpdateOrderStatusView(LoginRequiredMixin, StaffRequiredMixin, View):
             order.status = new_status
             order.save()
 
-            # Create status history entry
-            OrderStatus.objects.create(
-                order=order, status=new_status, notes=notes, updated_by=request.user
+            # Get the employee record of the current user if available
+            employee = None
+            try:
+                employee = Employee.objects.get(user=request.user)
+            except Employee.DoesNotExist:
+                pass
+
+            # Create status history entry with employee if available
+            status_update = OrderStatus.objects.create(
+                order=order,
+                status=new_status,
+                notes=notes,
+                updated_by=request.user,
+                updated_by_employee=employee,
             )
 
             messages.success(
@@ -548,9 +575,26 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         # Get recent orders
         recent_orders = Order.objects.order_by("-created_at")[:10]
 
-        # Get orders by day for the last 30 days
+        # Get recent status updates with employee information
+        recent_status_updates = OrderStatus.objects.select_related(
+            "updated_by_employee", "order"
+        ).order_by("-timestamp")[:10]
+
+        # Get top employees by status updates in the last 30 days
         today = timezone.now().date()
         thirty_days_ago = today - timezone.timedelta(days=30)
+
+        top_status_updaters = (
+            OrderStatus.objects.filter(
+                timestamp__date__gte=thirty_days_ago, updated_by_employee__isnull=False
+            )
+            .values(
+                "updated_by_employee__user__first_name",
+                "updated_by_employee__user__last_name",
+            )
+            .annotate(count=Count("id"))
+            .order_by("-count")[:5]
+        )
 
         # Statistical data
         context.update(
@@ -565,6 +609,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 "status_counts": status_counts,
                 "today": today,
                 "thirty_days_ago": thirty_days_ago,
+                "recent_status_updates": recent_status_updates,
+                "top_status_updaters": top_status_updaters,
             }
         )
 
@@ -629,3 +675,220 @@ class CustomFieldDeleteView(LoginRequiredMixin, StaffRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(request, "Custom field deleted successfully.")
         return super().delete(request, *args, **kwargs)
+
+
+# Employee Views
+class EmployeeListView(LoginRequiredMixin, StaffRequiredMixin, ListView):
+    model = Employee
+    template_name = "bloom/employee_list.html"
+    context_object_name = "employees"
+    paginate_by = 20
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        form = EmployeeSearchForm(self.request.GET)
+
+        if form.is_valid():
+            search = form.cleaned_data.get("search")
+            role = form.cleaned_data.get("role")
+            department = form.cleaned_data.get("department")
+            is_active = form.cleaned_data.get("is_active")
+
+            if search:
+                queryset = queryset.filter(
+                    Q(user__first_name__icontains=search)
+                    | Q(user__last_name__icontains=search)
+                    | Q(user__email__icontains=search)
+                    | Q(department__icontains=search)
+                    | Q(phone_extension__icontains=search)
+                )
+
+            if role:
+                queryset = queryset.filter(role=role)
+
+            if department:
+                queryset = queryset.filter(department__icontains=department)
+
+            if is_active is not None:
+                queryset = queryset.filter(is_active=is_active)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["search_form"] = EmployeeSearchForm(self.request.GET)
+        return context
+
+
+class EmployeeDetailView(LoginRequiredMixin, StaffRequiredMixin, DetailView):
+    model = Employee
+    template_name = "bloom/employee_detail.html"
+    context_object_name = "employee"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        employee = self.object
+
+        # Get orders associated with this employee
+        context["designed_orders"] = Order.objects.filter(assigned_designer=employee)
+        context["delivered_orders"] = Order.objects.filter(assigned_delivery=employee)
+        context["processed_orders"] = Order.objects.filter(processed_by=employee)
+
+        # Get assignment history
+        context["assignments"] = EmployeeOrderAssignment.objects.filter(
+            employee=employee
+        ).select_related("order")
+
+        # Get active assignments
+        context["active_assignments"] = EmployeeOrderAssignment.objects.filter(
+            employee=employee, completed=False
+        ).select_related("order")
+
+        return context
+
+
+class EmployeeCreateView(LoginRequiredMixin, StaffRequiredMixin, CreateView):
+    model = Employee
+    form_class = EmployeeForm
+    template_name = "bloom/employee_form.html"
+    success_url = reverse_lazy("bloom:employee_list")
+
+    def form_valid(self, form):
+        # Check if this is a request to create a new user along with the employee
+        if (
+            self.request.user.is_superuser
+            and self.request.POST.get("create_new_user") == "true"
+        ):
+            # Create a new user
+            from accounts.models import CustomUser
+            from django.contrib.auth.hashers import make_password
+
+            try:
+                email = self.request.POST.get("new_email")
+                first_name = self.request.POST.get("new_first_name")
+                last_name = self.request.POST.get("new_last_name")
+                password = self.request.POST.get("new_password1")
+                is_staff = self.request.POST.get("new_is_staff") == "on"
+
+                # Validate that passwords match
+                if password != self.request.POST.get("new_password2"):
+                    messages.error(self.request, "Passwords don't match.")
+                    return self.form_invalid(form)
+
+                # Check if user with this email already exists
+                if CustomUser.objects.filter(email=email).exists():
+                    messages.error(
+                        self.request, f"A user with email {email} already exists."
+                    )
+                    return self.form_invalid(form)
+
+                # Create the user
+                user = CustomUser.objects.create(
+                    email=email,
+                    first_name=first_name,
+                    last_name=last_name,
+                    is_staff=is_staff,
+                    password=make_password(password),
+                )
+
+                # Set the user in the form
+                form.instance.user = user
+                messages.success(
+                    self.request,
+                    f"New user {user.get_full_name()} created successfully.",
+                )
+
+            except Exception as e:
+                messages.error(self.request, f"Error creating new user: {str(e)}")
+                return self.form_invalid(form)
+
+        messages.success(self.request, "Employee created successfully.")
+        return super().form_valid(form)
+
+
+class EmployeeUpdateView(LoginRequiredMixin, StaffRequiredMixin, UpdateView):
+    model = Employee
+    form_class = EmployeeForm
+    template_name = "bloom/employee_form.html"
+
+    def get_success_url(self):
+        return reverse_lazy("bloom:employee_detail", kwargs={"pk": self.object.pk})
+
+    def form_valid(self, form):
+        messages.success(self.request, "Employee updated successfully.")
+        return super().form_valid(form)
+
+
+class EmployeeDeleteView(LoginRequiredMixin, StaffRequiredMixin, DeleteView):
+    model = Employee
+    template_name = "bloom/employee_confirm_delete.html"
+    success_url = reverse_lazy("bloom:employee_list")
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, "Employee record deleted successfully.")
+        return super().delete(request, *args, **kwargs)
+
+
+class AssignEmployeeToOrderView(LoginRequiredMixin, StaffRequiredMixin, CreateView):
+    model = EmployeeOrderAssignment
+    form_class = EmployeeOrderAssignmentForm
+    template_name = "bloom/employee_order_assignment_form.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["order"] = get_object_or_404(Order, pk=self.kwargs["order_pk"])
+        return context
+
+    def form_valid(self, form):
+        # Set the order
+        form.instance.order_id = self.kwargs["order_pk"]
+
+        # Set the assigner to current user's employee record if it exists
+        try:
+            form.instance.assigned_by = Employee.objects.get(user=self.request.user)
+        except Employee.DoesNotExist:
+            pass
+
+        # Save the assignment
+        response = super().form_valid(form)
+
+        # Update the order with the assigned employee based on role
+        order = self.object.order
+        employee = self.object.employee
+        role = self.object.role
+
+        if role == "designer" and employee.can_arrange_flowers:
+            order.assigned_designer = employee
+        elif role == "delivery" and employee.can_deliver_orders:
+            order.assigned_delivery = employee
+        elif role in ["manager", "sales"] and employee.can_process_orders:
+            order.processed_by = employee
+
+        order.save()
+
+        messages.success(
+            self.request,
+            f"{employee.user.get_full_name()} has been assigned to this order as {self.object.get_role_display()}",
+        )
+        return response
+
+    def get_success_url(self):
+        return reverse_lazy(
+            "bloom:order_detail", kwargs={"pk": self.kwargs["order_pk"]}
+        )
+
+
+class CompleteAssignmentView(LoginRequiredMixin, StaffRequiredMixin, View):
+    def post(self, request, pk):
+        assignment = get_object_or_404(EmployeeOrderAssignment, pk=pk)
+        notes = request.POST.get("notes", "")
+
+        # Complete the assignment
+        assignment.complete_assignment(notes)
+
+        messages.success(
+            request,
+            f"Assignment for {assignment.employee.user.get_full_name()} has been marked as completed",
+        )
+
+        return redirect("bloom:order_detail", pk=assignment.order.pk)

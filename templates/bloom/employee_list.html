@@ -1,0 +1,173 @@
+{% extends 'bloom/base.html' %}
+{% load static %}
+
+{% block title %}
+  Employee Management - Bloom
+{% endblock %}
+
+{% block bloom_content %}
+  <div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1>Employees</h1>
+      <a href="{% url 'bloom:employee_create' %}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Add Employee</a>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header bg-light">
+        <h5 class="mb-0">Search & Filter</h5>
+      </div>
+      <div class="card-body">
+        <form method="get" class="row g-3">
+          <div class="col-md-4">{{ search_form.search }}</div>
+          <div class="col-md-3">
+            <label for="{{ search_form.role.id_for_label }}" class="form-label">Role</label>
+            {{ search_form.role }}
+          </div>
+          <div class="col-md-3">
+            <label for="{{ search_form.department.id_for_label }}" class="form-label">Department</label>
+            {{ search_form.department }}
+          </div>
+          <div class="col-md-2">
+            <label for="{{ search_form.is_active.id_for_label }}" class="form-label">Status</label>
+            {{ search_form.is_active }}
+          </div>
+          <div class="col-12">
+            <button type="submit" class="btn btn-secondary"><i class="bi bi-search"></i> Search</button>
+            <a href="{% url 'bloom:employee_list' %}" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i> Clear</a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        {% if employees %}
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Role</th>
+                  <th>Department</th>
+                  <th>Contact</th>
+                  <th>Capabilities</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for employee in employees %}
+                  <tr>
+                    <td>
+                      <a href="{% url 'bloom:employee_detail' employee.pk %}">{{ employee.user.get_full_name }}</a>
+                    </td>
+                    <td>{{ employee.get_role_display }}</td>
+                    <td>{{ employee.department }}</td>
+                    <td>
+                      <div>{{ employee.user.email }}</div>
+                      {% if employee.phone_extension %}
+                        <small class="text-muted">Ext: {{ employee.phone_extension }}</small>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if employee.can_process_orders %}
+                        <span class="badge bg-info">Process Orders</span>
+                      {% endif %}
+                      {% if employee.can_arrange_flowers %}
+                        <span class="badge bg-success">Arrange Flowers</span>
+                      {% endif %}
+                      {% if employee.can_deliver_orders %}
+                        <span class="badge bg-warning">Deliver Orders</span>
+                      {% endif %}
+                      {% if employee.can_manage_staff %}
+                        <span class="badge bg-danger">Manage Staff</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if employee.is_active %}
+                        <span class="badge bg-success">Active</span>
+                      {% else %}
+                        <span class="badge bg-secondary">Inactive</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <div class="btn-group btn-group-sm">
+                        <a href="{% url 'bloom:employee_detail' employee.pk %}" class="btn btn-outline-primary"><i class="bi bi-eye"></i></a>
+                        <a href="{% url 'bloom:employee_update' employee.pk %}" class="btn btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+                        <a href="{% url 'bloom:employee_delete' employee.pk %}" class="btn btn-outline-danger"><i class="bi bi-trash"></i></a>
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          {% if is_paginated %}
+            <nav aria-label="Page navigation" class="mt-4">
+              <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                  <li class="page-item">
+                    <a class="page-link"
+                      href="?page=1{% for key, value in request.GET.items %}
+                        {% if key != 'page' %}
+                          
+                          &{{ key }}={{ value }}
+                        {% endif %}
+                      {% endfor %}">
+                      First
+                    </a>
+                  </li>
+                  <li class="page-item">
+                    <a class="page-link"
+                      href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}
+                        {% if key != 'page' %}
+                          
+                          &{{ key }}={{ value }}
+                        {% endif %}
+                      {% endfor %}">
+                      Previous
+                    </a>
+                  </li>
+                {% endif %}
+
+                <li class="page-item active">
+                  <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                </li>
+
+                {% if page_obj.has_next %}
+                  <li class="page-item">
+                    <a class="page-link"
+                      href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}
+                        {% if key != 'page' %}
+                          
+                          &{{ key }}={{ value }}
+                        {% endif %}
+                      {% endfor %}">
+                      Next
+                    </a>
+                  </li>
+                  <li class="page-item">
+                    <a class="page-link"
+                      href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}
+                        {% if key != 'page' %}
+                          
+                          &{{ key }}={{ value }}
+                        {% endif %}
+                      {% endfor %}">
+                      Last
+                    </a>
+                  </li>
+                {% endif %}
+              </ul>
+            </nav>
+          {% endif %}
+        {% else %}
+          <div class="alert alert-info">
+            No employees found. <a href="{% url 'bloom:employee_create' %}">Add the first employee</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

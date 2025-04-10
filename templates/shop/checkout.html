@@ -9,7 +9,7 @@
   <h1 class="mb-4">Checkout</h1>
   
   {% if cart and cart.items.all %}
-    <form method="post" id="checkout-form">
+    <form method="post" action="{% url 'shop:checkout_confirm' %}" id="checkoutForm" class="needs-validation" novalidate>
       {% csrf_token %}
       <input type="hidden" id="id_shipping_cost" name="shipping_cost" value="0">
       <input type="hidden" id="id_tax_amount" name="tax_amount" value="0">
@@ -438,7 +438,7 @@
     });
     
     // Form validation
-    const checkoutForm = document.getElementById('checkout-form');
+    const checkoutForm = document.getElementById('checkoutForm');
     
     checkoutForm.addEventListener('submit', function(event) {
       event.preventDefault();
@@ -447,7 +447,7 @@
       alert('Order placed successfully! This is just a demo. In a real application, this would submit the order and redirect to a confirmation page.');
       
       // Redirect to a confirmation page
-      // window.location.href = "{% url 'shop:order_confirmation' %}";
+      // window.location.href = "{% url 'shop:order_success' order_number='DEMO123' %}";
     });
   });
 </script>

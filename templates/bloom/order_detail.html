@@ -51,22 +51,46 @@
                     <div class="col-md-8">
                       <span class="badge rounded-pill 
                       {% if order.status == 'new' %}
+                          
+                          
                           bg-secondary
 
+
+
                         {% elif order.status == 'design' %}
+                          
+                          
                           bg-primary
 
+
+
                         {% elif order.status == 'preparation' %}
+                          
+                          
                           bg-info
 
+
+
                         {% elif order.status == 'delivery' %}
+                          
+                          
                           bg-warning
 
+
+
                         {% elif order.status == 'completed' %}
+                          
+                          
                           bg-success
 
+
+
                         {% else %}
+                          
+                          
                           bg-danger
+
+
                         {% endif %}">
                         {{ order.get_status_display }}
                       </span>
@@ -160,6 +184,108 @@
                   <div class="row mb-2">
                     <div class="col-md-4 fw-bold">Postal Code:</div>
                     <div class="col-md-8">{{ order.shipping_postal_code }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Staff Assignments -->
+          <div class="row mb-4">
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                  <h5 class="mb-0"><i class="bi bi-people me-2"></i>Staff Assignments</h5>
+                  <a href="{% url 'bloom:assign_employee_to_order' order.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-person-plus"></i> Assign Staff</a>
+                </div>
+                <div class="card-body">
+                  <div class="row mb-3">
+                    <!-- Current Assignments -->
+                    <div class="col-md-6">
+                      <h6 class="border-bottom pb-2 mb-3">Current Assignments</h6>
+                      <div class="row mb-2">
+                        <div class="col-md-4 fw-bold">Designer:</div>
+                        <div class="col-md-8">
+                          {% if order.assigned_designer %}
+                            <a href="{% url 'bloom:employee_detail' order.assigned_designer.pk %}">{{ order.assigned_designer.user.get_full_name }}</a>
+                            <span class="badge bg-success ms-1">{{ order.assigned_designer.get_role_display }}</span>
+                          {% else %}
+                            <span class="text-muted">Not assigned</span>
+                          {% endif %}
+                        </div>
+                      </div>
+                      <div class="row mb-2">
+                        <div class="col-md-4 fw-bold">Delivery:</div>
+                        <div class="col-md-8">
+                          {% if order.assigned_delivery %}
+                            <a href="{% url 'bloom:employee_detail' order.assigned_delivery.pk %}">{{ order.assigned_delivery.user.get_full_name }}</a>
+                            <span class="badge bg-warning ms-1">{{ order.assigned_delivery.get_role_display }}</span>
+                          {% else %}
+                            <span class="text-muted">Not assigned</span>
+                          {% endif %}
+                        </div>
+                      </div>
+                      <div class="row mb-2">
+                        <div class="col-md-4 fw-bold">Processed by:</div>
+                        <div class="col-md-8">
+                          {% if order.processed_by %}
+                            <a href="{% url 'bloom:employee_detail' order.processed_by.pk %}">{{ order.processed_by.user.get_full_name }}</a>
+                            <span class="badge bg-info ms-1">{{ order.processed_by.get_role_display }}</span>
+                          {% else %}
+                            <span class="text-muted">Not assigned</span>
+                          {% endif %}
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Assignment History -->
+                    <div class="col-md-6">
+                      <h6 class="border-bottom pb-2 mb-3">Assignment History</h6>
+                      {% if employee_assignments %}
+                        <div class="table-responsive">
+                          <table class="table table-sm">
+                            <thead>
+                              <tr>
+                                <th>Employee</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {% for assignment in employee_assignments %}
+                                <tr>
+                                  <td>
+                                    <a href="{% url 'bloom:employee_detail' assignment.employee.pk %}">{{ assignment.employee.user.get_full_name }}</a>
+                                  </td>
+                                  <td>{{ assignment.get_role_display }}</td>
+                                  <td>
+                                    {% if assignment.completed %}
+                                      <span class="badge bg-success">Completed</span>
+                                    {% else %}
+                                      <span class="badge bg-warning">Active</span>
+                                    {% endif %}
+                                  </td>
+                                  <td>{{ assignment.assigned_at|date:'M d, Y' }}</td>
+                                  <td>
+                                    {% if not assignment.completed %}
+                                      <form method="post" action="{% url 'bloom:complete_assignment' assignment.pk %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="notes" value="Marked as completed" />
+                                        <button type="submit" class="btn btn-sm btn-success"><i class="bi bi-check-lg"></i></button>
+                                      </form>
+                                    {% endif %}
+                                  </td>
+                                </tr>
+                              {% endfor %}
+                            </tbody>
+                          </table>
+                        </div>
+                      {% else %}
+                        <div class="alert alert-info">No assignment history found</div>
+                      {% endif %}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -295,22 +421,46 @@
                     <h6 class="mb-1">
                       <span class="badge rounded-pill 
                     {% if status_entry.status == 'new' %}
+                          
+                          
                           bg-secondary
 
+
+
                         {% elif status_entry.status == 'design' %}
+                          
+                          
                           bg-primary
 
+
+
                         {% elif status_entry.status == 'preparation' %}
+                          
+                          
                           bg-info
 
+
+
                         {% elif status_entry.status == 'delivery' %}
+                          
+                          
                           bg-warning
 
+
+
                         {% elif status_entry.status == 'completed' %}
+                          
+                          
                           bg-success
 
+
+
                         {% else %}
+                          
+                          
                           bg-danger
+
+
                         {% endif %}">
                         {{ status_entry.get_status_display }}
                       </span>

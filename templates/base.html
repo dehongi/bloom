@@ -55,16 +55,14 @@
               <a class="nav-link {% if '/shop/products/' in request.path %}active{% endif %}" href="{% url 'shop:product_list' %}"><i class="bi bi-shop me-1"></i>Shop</a>
             </li>
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle {% if '/category/' in request.path %}active{% endif %}" href="#" id="categoriesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-grid me-1"></i>Categories</a>
+              <a class="nav-link dropdown-toggle {% if '/shop/category/' in request.path %}active{% endif %}" href="#" id="categoriesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-grid me-1"></i>Categories</a>
               <ul class="dropdown-menu" aria-labelledby="categoriesDropdown">
                 {% for category in categories %}
-                  <li>
-                    <a class="dropdown-item" href="{% url 'shop:category_detail' category.slug %}">{{ category.name }}</a>
-                  </li>
-                {% empty %}
-                  <li>
-                    <a class="dropdown-item" href="{% url 'shop:product_list' %}">All Products</a>
-                  </li>
+                  {% if not category.parent %}
+                    <li>
+                      <a class="dropdown-item" href="{% url 'shop:category_detail' category.slug %}">{{ category.name }}</a>
+                    </li>
+                  {% endif %}
                 {% endfor %}
               </ul>
             </li>
