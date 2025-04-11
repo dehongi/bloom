@@ -9,6 +9,7 @@ from .models import (
     OrderItem,
     CustomField,
     OrderStatus,
+    ContactPerson,
 )
 
 
@@ -40,6 +41,8 @@ class CustomerForm(BootstrapModelForm):
         model = Customer
         fields = [
             "name",
+            "company_name",
+            "contact_type",
             "email",
             "phone",
             "address",
@@ -47,9 +50,11 @@ class CustomerForm(BootstrapModelForm):
             "state",
             "country",
             "postal_code",
+            "notes",
         ]
         widgets = {
             "address": forms.Textarea(attrs={"rows": 3}),
+            "notes": forms.Textarea(attrs={"rows": 3}),
         }
 
 
@@ -239,3 +244,24 @@ class ProductSearchForm(forms.Form):
         empty_label="All Occasions",
         widget=forms.Select(attrs={"class": "form-select"}),
     )
+
+
+class ContactPersonForm(BootstrapModelForm):
+    class Meta:
+        model = ContactPerson
+        fields = [
+            "salutation",
+            "first_name",
+            "last_name",
+            "email",
+            "phone",
+            "mobile",
+            "is_primary_contact",
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["is_primary_contact"].widget.attrs.update(
+            {"class": "form-check-input ms-0"}
+        )
+        self.fields["salutation"].required = False

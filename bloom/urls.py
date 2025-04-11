@@ -24,6 +24,22 @@ urlpatterns = [
         views.CustomerDeleteView.as_view(),
         name="customer_delete",
     ),
+    # ContactPerson URLs
+    path(
+        "customers/<int:customer_pk>/contacts/new/",
+        views.ContactPersonCreateView.as_view(),
+        name="contact_person_create",
+    ),
+    path(
+        "contacts/<int:pk>/edit/",
+        views.ContactPersonUpdateView.as_view(),
+        name="contact_person_update",
+    ),
+    path(
+        "contacts/<int:pk>/delete/",
+        views.ContactPersonDeleteView.as_view(),
+        name="contact_person_delete",
+    ),
     # Occasion URLs
     path("occasions/", views.OccasionListView.as_view(), name="occasion_list"),
     path("occasions/new/", views.OccasionCreateView.as_view(), name="occasion_create"),

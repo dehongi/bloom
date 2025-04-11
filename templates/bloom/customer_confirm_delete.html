@@ -1,0 +1,44 @@
+{% extends 'bloom/base.html' %}
+{% load static %}
+
+{% block bloom_content %}
+  <div class="row mb-4">
+    <div class="col-md-6 mx-auto">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body text-center p-5">
+          <h3 class="card-title mb-4 text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Delete Customer</h3>
+
+          <p class="mb-4 fs-5">
+            Are you sure you want to delete <strong>{{ customer.name }}</strong>?
+          </p>
+
+          {% if customer.company_name %}
+            <p class="mb-4">
+              Company: <strong>{{ customer.company_name }}</strong>
+            </p>
+          {% endif %}
+
+          {% if customer.contact_persons.count > 0 %}
+            <div class="alert alert-warning">
+              <i class="bi bi-exclamation-triangle me-2"></i>
+              This customer has {{ customer.contact_persons.count }} associated contact persons that will also be deleted.
+            </div>
+          {% endif %}
+
+          {% if customer.order_set.count > 0 %}
+            <div class="alert alert-danger">
+              <i class="bi bi-exclamation-circle me-2"></i>
+              This customer has {{ customer.order_set.count }} orders. Deleting this customer may affect those orders.
+            </div>
+          {% endif %}
+
+          <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i>Yes, Delete</button>
+            <a href="{% url 'bloom:customer_detail' customer.pk %}" class="btn btn-outline-secondary ms-2"><i class="bi bi-x-circle me-1"></i>Cancel</a>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

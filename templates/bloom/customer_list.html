@@ -44,6 +44,9 @@
                   <tr>
                     <td>
                       <a href="{% url 'bloom:customer_detail' customer.pk %}">{{ customer.name }}</a>
+                      {% if customer.company_name %}
+                        <small class="text-muted d-block">{{ customer.company_name }}</small>
+                      {% endif %}
                     </td>
                     <td>{{ customer.email }}</td>
                     <td>{{ customer.phone }}</td>
@@ -89,6 +92,7 @@
                   <li class="page-item">
                     <a class="page-link"
                       href="?page=1{% if search_term %}
+                        
                         &search={{ search_term }}
                       {% endif %}">
                       &laquo; First
@@ -97,6 +101,7 @@
                   <li class="page-item">
                     <a class="page-link"
                       href="?page={{ page_obj.previous_page_number }}{% if search_term %}
+                        
                         &search={{ search_term }}
                       {% endif %}">
                       Previous
@@ -112,6 +117,7 @@
                   <li class="page-item">
                     <a class="page-link"
                       href="?page={{ page_obj.next_page_number }}{% if search_term %}
+                        
                         &search={{ search_term }}
                       {% endif %}">
                       Next
@@ -120,6 +126,7 @@
                   <li class="page-item">
                     <a class="page-link"
                       href="?page={{ page_obj.paginator.num_pages }}{% if search_term %}
+                        
                         &search={{ search_term }}
                       {% endif %}">
                       Last &raquo;

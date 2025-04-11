@@ -1,0 +1,31 @@
+{% extends 'bloom/base.html' %}
+{% load static %}
+
+{% block bloom_content %}
+  <div class="row mb-4">
+    <div class="col-md-6 mx-auto">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body text-center p-5">
+          <h3 class="card-title mb-4"><i class="bi bi-exclamation-triangle text-danger me-2"></i>Delete Contact Person</h3>
+
+          <p class="mb-4 fs-5">
+            Are you sure you want to delete <strong>{{ contact_person }}</strong>?
+          </p>
+
+          {% if contact_person.is_primary_contact %}
+            <div class="alert alert-warning">
+              <i class="bi bi-exclamation-triangle me-2"></i>
+              This is the primary contact person for {{ contact_person.customer.name }}. If you delete this contact, you may need to set another contact as primary.
+            </div>
+          {% endif %}
+
+          <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i>Yes, Delete</button>
+            <a href="{% url 'bloom:customer_detail' contact_person.customer.pk %}" class="btn btn-outline-secondary ms-2"><i class="bi bi-x-circle me-1"></i>Cancel</a>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

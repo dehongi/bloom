@@ -1,0 +1,186 @@
+{% extends 'bloom/base.html' %}
+{% load static %}
+
+{% block bloom_content %}
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="card-title mb-0">
+              <i class="bi bi-person me-2"></i>{{ customer.name }}
+              {% if customer.company_name %}
+                <small class="text-muted">({{ customer.company_name }})</small>
+              {% endif %}
+            </h3>
+            <div>
+              <a href="{% url 'bloom:customer_update' customer.pk %}" class="btn btn-outline-primary me-2"><i class="bi bi-pencil me-1"></i>Edit Customer</a>
+              <a href="{% url 'bloom:customer_delete' customer.pk %}" class="btn btn-outline-danger delete-confirm-btn"><i class="bi bi-trash me-1"></i>Delete</a>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="card mb-4">
+                <div class="card-header">
+                  <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Customer Information</h5>
+                </div>
+                <div class="card-body">
+                  <div class="row mb-2">
+                    <div class="col-md-4 fw-bold">Customer Type:</div>
+                    <div class="col-md-8">{{ customer.get_contact_type_display }}</div>
+                  </div>
+                  {% if customer.company_name %}
+                    <div class="row mb-2">
+                      <div class="col-md-4 fw-bold">Company:</div>
+                      <div class="col-md-8">{{ customer.company_name }}</div>
+                    </div>
+                  {% endif %}
+                  <div class="row mb-2">
+                    <div class="col-md-4 fw-bold">Email:</div>
+                    <div class="col-md-8">
+                      <a href="mailto:{{ customer.email }}">{{ customer.email }}</a>
+                    </div>
+                  </div>
+                  <div class="row mb-2">
+                    <div class="col-md-4 fw-bold">Phone:</div>
+                    <div class="col-md-8">
+                      <a href="tel:{{ customer.phone }}">{{ customer.phone }}</a>
+                    </div>
+                  </div>
+                  <div class="row mb-2">
+                    <div class="col-md-4 fw-bold">Address:</div>
+                    <div class="col-md-8">
+                      {{ customer.address }}<br />
+                      {{ customer.city }}, {{ customer.state }} {{ customer.postal_code }}<br />
+                      {{ customer.country }}
+                    </div>
+                  </div>
+                  {% if customer.notes %}
+                    <div class="row mb-2">
+                      <div class="col-md-4 fw-bold">Notes:</div>
+                      <div class="col-md-8">{{ customer.notes }}</div>
+                    </div>
+                  {% endif %}
+                  <div class="row mb-2">
+                    <div class="col-md-4 fw-bold">Created:</div>
+                    <div class="col-md-8">{{ customer.created_at|date:'F j, Y' }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <h5 class="mb-0"><i class="bi bi-people me-2"></i>Contact Persons</h5>
+                  <a href="{% url 'bloom:contact_person_create' customer.pk %}" class="btn btn-sm btn-primary"><i class="bi bi-person-plus me-1"></i>Add Contact</a>
+                </div>
+                <div class="card-body">
+                  {% if customer.contact_persons.all %}
+                    <div class="list-group">
+                      {% for contact in customer.contact_persons.all %}
+                        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                          <div>
+                            <h6 class="mb-1">
+                              {{ contact }}
+                              {% if contact.is_primary_contact %}
+                                <span class="badge bg-primary">Primary</span>
+                              {% endif %}
+                            </h6>
+                            <p class="mb-1 small">
+                              {% if contact.email %}
+                                <i class="bi bi-envelope me-1"></i>
+                                <a href="mailto:{{ contact.email }}">{{ contact.email }}</a>
+                              {% endif %}
+                              {% if contact.phone or contact.mobile %}
+                                <br />
+                                <i class="bi bi-telephone me-1"></i>
+                                {% if contact.phone %}{{ contact.phone }}{% endif %}
+                                {% if contact.phone and contact.mobile %} / {% endif %}
+                                {% if contact.mobile %}{{ contact.mobile }}{% endif %}
+                              {% endif %}
+                            </p>
+                          </div>
+                          <div>
+                            <a href="{% url 'bloom:contact_person_update' contact.pk %}" class="btn btn-sm btn-outline-secondary me-1" title="Edit"><i class="bi bi-pencil"></i></a>
+                            <a href="{% url 'bloom:contact_person_delete' contact.pk %}" class="btn btn-sm btn-outline-danger delete-confirm-btn" title="Delete"><i class="bi bi-trash"></i></a>
+                          </div>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  {% else %}
+                    <p class="text-muted">
+                      No contact persons added yet. <a href="{% url 'bloom:contact_person_create' customer.pk %}">Add one now</a>.
+                    </p>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Orders Section -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="bi bi-bag me-2"></i>Orders</h5>
+          <a href="{% url 'bloom:order_create' %}?customer={{ customer.pk }}" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg me-1"></i>New Order</a>
+        </div>
+        <div class="card-body">
+          {% if orders %}
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Reference #</th>
+                    <th>Order Date</th>
+                    <th>Ship Date</th>
+                    <th>Status</th>
+                    <th>Total</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for order in orders %}
+                    <tr>
+                      <td>
+                        <a href="{% url 'bloom:order_detail' order.pk %}">{{ order.reference_number }}</a>
+                      </td>
+                      <td>{{ order.order_date }}</td>
+                      <td>{{ order.shipment_date }}</td>
+                      <td>
+                        <span class="badge {% if order.status == 'completed' %}
+                            bg-success
+                          {% elif order.status == 'cancelled' %}
+                            bg-danger
+                          {% else %}
+                            bg-primary
+                          {% endif %}">
+                          {{ order.get_status_display }}
+                        </span>
+                      </td>
+                      <td>${{ order.total }}</td>
+                      <td>
+                        <div class="btn-group btn-group-sm">
+                          <a href="{% url 'bloom:order_detail' order.pk %}" class="btn btn-outline-primary" title="View"><i class="bi bi-eye"></i></a>
+                          <a href="{% url 'bloom:order_update' order.pk %}" class="btn btn-outline-secondary" title="Edit"><i class="bi bi-pencil"></i></a>
+                        </div>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <p class="text-muted">No orders found for this customer.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

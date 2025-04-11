@@ -1,0 +1,106 @@
+{% extends 'bloom/base.html' %}
+{% load static %}
+
+{% block bloom_content %}
+  <div class="row mb-4">
+    <div class="col-md-8 mx-auto">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h3 class="card-title mb-4">
+            {% if contact_person.pk %}
+              <i class="bi bi-pencil-square me-2"></i>Edit Contact Person
+            {% else %}
+              <i class="bi bi-person-plus me-2"></i>Add Contact Person
+            {% endif %}
+            {% if customer %}
+              <small class="text-muted">for {{ customer.name }}</small>
+            {% endif %}
+          </h3>
+
+          <form method="post" novalidate>
+            {% csrf_token %}
+
+            <div class="row g-3">
+              <div class="col-md-3">
+                <label for="{{ form.salutation.id_for_label }}" class="form-label">Salutation</label>
+                {{ form.salutation }}
+                {% if form.salutation.errors %}
+                  <div class="invalid-feedback d-block">{{ form.salutation.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-4">
+                <label for="{{ form.first_name.id_for_label }}" class="form-label">First Name*</label>
+                {{ form.first_name }}
+                {% if form.first_name.errors %}
+                  <div class="invalid-feedback d-block">{{ form.first_name.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-5">
+                <label for="{{ form.last_name.id_for_label }}" class="form-label">Last Name*</label>
+                {{ form.last_name }}
+                {% if form.last_name.errors %}
+                  <div class="invalid-feedback d-block">{{ form.last_name.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                  <div class="invalid-feedback d-block">{{ form.email.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <label for="{{ form.phone.id_for_label }}" class="form-label">Phone</label>
+                {{ form.phone }}
+                {% if form.phone.errors %}
+                  <div class="invalid-feedback d-block">{{ form.phone.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <label for="{{ form.mobile.id_for_label }}" class="form-label">Mobile</label>
+                {{ form.mobile }}
+                {% if form.mobile.errors %}
+                  <div class="invalid-feedback d-block">{{ form.mobile.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-check mt-4">
+                  {{ form.is_primary_contact }}
+                  <label class="form-check-label" for="{{ form.is_primary_contact.id_for_label }}">Primary Contact</label>
+                  {% if form.is_primary_contact.errors %}
+                    <div class="invalid-feedback d-block">{{ form.is_primary_contact.errors }}</div>
+                  {% endif %}
+                </div>
+                <small class="text-muted d-block mt-1">If checked, this person will be the primary contact for the customer. Their email and phone will be used as the main contact information.</small>
+              </div>
+
+              <div class="col-12 mt-4">
+                <button type="submit" class="btn btn-primary">
+                  {% if contact_person.pk %}
+                    <i class="bi bi-save me-1"></i>Save Changes
+                  {% else %}
+                    <i class="bi bi-person-plus me-1"></i>Add Contact Person
+                  {% endif %}
+                </button>
+                <a href="{% if customer %}
+                    {% url 'bloom:customer_detail' customer.pk %}
+                  {% else %}
+                    {% url 'bloom:customer_detail' contact_person.customer.pk %}
+                  {% endif %}"
+                  class="btn btn-outline-secondary ms-2">
+                  <i class="bi bi-x-circle me-1"></i>Cancel
+                </a>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

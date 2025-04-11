@@ -4,12 +4,21 @@ from accounts.models import CustomUser
 
 
 class Customer(models.Model):
+    CONTACT_TYPE_CHOICES = [
+        ("customer", "Customer"),
+        ("vendor", "Vendor"),
+        ("partner", "Partner"),
+        ("other", "Other"),
+    ]
+
     user = models.OneToOneField(
         CustomUser, on_delete=models.CASCADE, null=True, blank=True
     )
-    name = models.CharField(max_length=100)
-    email = models.EmailField()
-    phone = models.CharField(max_length=20)
+    name = models.CharField(
+        max_length=100
+    )  # Will store contact_name or derive from first/last name
+    email = models.EmailField()  # Will store primary contact's email
+    phone = models.CharField(max_length=20)  # Will store primary contact's phone
     address = models.TextField()
     city = models.CharField(max_length=50)
     state = models.CharField(max_length=50)
@@ -17,8 +26,92 @@ class Customer(models.Model):
     postal_code = models.CharField(max_length=20)
     external_id = models.CharField(max_length=50, blank=True, null=True)
 
+    # New fields from client model
+    contact_type = models.CharField(
+        max_length=20, choices=CONTACT_TYPE_CHOICES, default="customer"
+    )
+    company_name = models.CharField(max_length=100, blank=True)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     def __str__(self):
+        if self.company_name:
+            return f"{self.name} ({self.company_name})"
         return self.name
+
+    @property
+    def primary_contact(self):
+        """Return the primary contact person if any exists"""
+        primary = self.contact_persons.filter(is_primary_contact=True).first()
+        if primary:
+            return primary
+        return self.contact_persons.first()
+
+
+class ContactPerson(models.Model):
+    SALUTATION_CHOICES = [
+        ("Mr", "Mr"),
+        ("Mrs", "Mrs"),
+        ("Ms", "Ms"),
+        ("Dr", "Dr"),
+        ("Prof", "Prof"),
+        ("", "None"),
+    ]
+
+    customer = models.ForeignKey(
+        Customer, on_delete=models.CASCADE, related_name="contact_persons"
+    )
+    salutation = models.CharField(max_length=10, choices=SALUTATION_CHOICES, blank=True)
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    email = models.EmailField(blank=True)
+    mobile = models.CharField(max_length=20, blank=True)
+    phone = models.CharField(max_length=20, blank=True)
+    is_primary_contact = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-is_primary_contact", "first_name"]
+
+    def __str__(self):
+        if self.salutation:
+            return f"{self.salutation} {self.first_name} {self.last_name}"
+        return f"{self.first_name} {self.last_name}"
+
+    def save(self, *args, **kwargs):
+        # If this is marked as primary, unmark others
+        if self.is_primary_contact:
+            ContactPerson.objects.filter(
+                customer=self.customer, is_primary_contact=True
+            ).update(is_primary_contact=False)
+
+        super().save(*args, **kwargs)
+
+        # Update the parent customer's email and phone if this is the primary contact
+        if self.is_primary_contact:
+            update_fields = {}
+            if self.email:
+                update_fields["email"] = self.email
+            if self.phone:
+                update_fields["phone"] = self.phone
+            elif self.mobile:
+                update_fields["phone"] = self.mobile
+
+            if update_fields:
+                Customer.objects.filter(id=self.customer.id).update(**update_fields)
+
+
+class CustomerCustomField(models.Model):
+    customer = models.ForeignKey(
+        Customer, on_delete=models.CASCADE, related_name="custom_fields"
+    )
+    customfield_id = models.CharField(max_length=50)
+    value = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.customfield_id}: {self.value}"
 
 
 class Occasion(models.Model):

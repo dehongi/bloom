@@ -18,6 +18,7 @@ from django.utils import timezone
 
 from .models import (
     Customer,
+    ContactPerson,
     Occasion,
     ProductType,
     Product,
@@ -29,6 +30,7 @@ from .models import (
 )
 from .forms import (
     CustomerForm,
+    ContactPersonForm,
     OccasionForm,
     ProductTypeForm,
     ProductForm,
@@ -121,6 +123,59 @@ class CustomerDeleteView(LoginRequiredMixin, StaffRequiredMixin, DeleteView):
 
     def delete(self, request, *args, **kwargs):
         messages.success(request, "Customer deleted successfully.")
+        return super().delete(request, *args, **kwargs)
+
+
+# ContactPerson Views
+class ContactPersonCreateView(LoginRequiredMixin, StaffRequiredMixin, CreateView):
+    model = ContactPerson
+    form_class = ContactPersonForm
+    template_name = "bloom/contact_person_form.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["customer"] = get_object_or_404(Customer, pk=self.kwargs["customer_pk"])
+        return context
+
+    def form_valid(self, form):
+        form.instance.customer = get_object_or_404(
+            Customer, pk=self.kwargs["customer_pk"]
+        )
+        messages.success(self.request, "Contact person added successfully.")
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy(
+            "bloom:customer_detail", kwargs={"pk": self.kwargs["customer_pk"]}
+        )
+
+
+class ContactPersonUpdateView(LoginRequiredMixin, StaffRequiredMixin, UpdateView):
+    model = ContactPerson
+    form_class = ContactPersonForm
+    template_name = "bloom/contact_person_form.html"
+
+    def get_success_url(self):
+        return reverse_lazy(
+            "bloom:customer_detail", kwargs={"pk": self.object.customer.pk}
+        )
+
+    def form_valid(self, form):
+        messages.success(self.request, "Contact person updated successfully.")
+        return super().form_valid(form)
+
+
+class ContactPersonDeleteView(LoginRequiredMixin, StaffRequiredMixin, DeleteView):
+    model = ContactPerson
+    template_name = "bloom/contact_person_confirm_delete.html"
+
+    def get_success_url(self):
+        return reverse_lazy(
+            "bloom:customer_detail", kwargs={"pk": self.object.customer.pk}
+        )
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, "Contact person deleted successfully.")
         return super().delete(request, *args, **kwargs)
 
 

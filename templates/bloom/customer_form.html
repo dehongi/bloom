@@ -1,0 +1,132 @@
+{% extends 'bloom/base.html' %}
+{% load static %}
+
+{% block bloom_content %}
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h3 class="card-title mb-4">
+            {% if customer.pk %}
+              <i class="bi bi-pencil-square me-2"></i>Edit Customer
+            {% else %}
+              <i class="bi bi-person-plus me-2"></i>New Customer
+            {% endif %}
+          </h3>
+
+          <form method="post" novalidate>
+            {% csrf_token %}
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="{{ form.name.id_for_label }}" class="form-label">Name*</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                  <div class="invalid-feedback d-block">{{ form.name.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <label for="{{ form.company_name.id_for_label }}" class="form-label">Company Name</label>
+                {{ form.company_name }}
+                {% if form.company_name.errors %}
+                  <div class="invalid-feedback d-block">{{ form.company_name.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <label for="{{ form.contact_type.id_for_label }}" class="form-label">Contact Type</label>
+                {{ form.contact_type }}
+                {% if form.contact_type.errors %}
+                  <div class="invalid-feedback d-block">{{ form.contact_type.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <label for="{{ form.email.id_for_label }}" class="form-label">Email*</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                  <div class="invalid-feedback d-block">{{ form.email.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <label for="{{ form.phone.id_for_label }}" class="form-label">Phone*</label>
+                {{ form.phone }}
+                {% if form.phone.errors %}
+                  <div class="invalid-feedback d-block">{{ form.phone.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-12">
+                <label for="{{ form.address.id_for_label }}" class="form-label">Address*</label>
+                {{ form.address }}
+                {% if form.address.errors %}
+                  <div class="invalid-feedback d-block">{{ form.address.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <label for="{{ form.city.id_for_label }}" class="form-label">City*</label>
+                {{ form.city }}
+                {% if form.city.errors %}
+                  <div class="invalid-feedback d-block">{{ form.city.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <label for="{{ form.state.id_for_label }}" class="form-label">State/Province*</label>
+                {{ form.state }}
+                {% if form.state.errors %}
+                  <div class="invalid-feedback d-block">{{ form.state.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <label for="{{ form.postal_code.id_for_label }}" class="form-label">Postal Code*</label>
+                {{ form.postal_code }}
+                {% if form.postal_code.errors %}
+                  <div class="invalid-feedback d-block">{{ form.postal_code.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <label for="{{ form.country.id_for_label }}" class="form-label">Country*</label>
+                {{ form.country }}
+                {% if form.country.errors %}
+                  <div class="invalid-feedback d-block">{{ form.country.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-12">
+                <label for="{{ form.notes.id_for_label }}" class="form-label">Notes</label>
+                {{ form.notes }}
+                {% if form.notes.errors %}
+                  <div class="invalid-feedback d-block">{{ form.notes.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-12 mt-4">
+                <button type="submit" class="btn btn-primary">
+                  {% if customer.pk %}
+                    <i class="bi bi-save me-1"></i>Save Changes
+                  {% else %}
+                    <i class="bi bi-person-plus me-1"></i>Create Customer
+                  {% endif %}
+                </button>
+                <a href="{% if customer.pk %}
+                    {% url 'bloom:customer_detail' customer.pk %}
+                  {% else %}
+                    {% url 'bloom:customer_list' %}
+                  {% endif %}"
+                  class="btn btn-outline-secondary ms-2">
+                  <i class="bi bi-x-circle me-1"></i>Cancel
+                </a>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
