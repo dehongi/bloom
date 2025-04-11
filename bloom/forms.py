@@ -366,7 +366,7 @@ class EmployeeOrderAssignmentForm(BootstrapModelForm):
                 "data-manager-filter": "can_manage_staff",
             }
         )
-    )
+    
 
 
 class ContactPersonForm(BootstrapModelForm):
