@@ -1,0 +1,340 @@
+{% extends 'bloom/base.html' %}
+{% load static %}
+
+{% block title %}
+  {{ employee.user.get_full_name }} - Employee Detail
+{% endblock %}
+
+{% block bloom_content %}
+  <div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1>{{ employee.user.get_full_name }}</h1>
+      <div>
+        <a href="{% url 'bloom:employee_update' employee.pk %}" class="btn btn-primary"><i class="bi bi-pencil"></i> Edit</a>
+        <a href="{% url 'bloom:employee_list' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back to List</a>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-4">
+        <div class="card mb-4">
+          <div class="card-header bg-light">
+            <h5 class="mb-0">Employee Information</h5>
+          </div>
+          <div class="card-body">
+            <div class="text-center mb-3">
+              {% if employee.user.profile_picture %}
+                <img src="{{ employee.user.profile_picture.url }}" alt="{{ employee.user.get_full_name }}" class="img-fluid rounded-circle" style="width: 150px; height: 150px; object-fit: cover;" />
+              {% else %}
+                <div class="rounded-circle bg-secondary d-flex justify-content-center align-items-center mx-auto" style="width: 150px; height: 150px;">
+                  <span class="display-4 text-white">{{ employee.user.first_name|first }}{{ employee.user.last_name|first }}</span>
+                </div>
+              {% endif %}
+            </div>
+
+            <h4 class="text-center mb-3">{{ employee.user.get_full_name }}</h4>
+
+            <div class="mb-2">
+              <strong>Role:</strong>
+              <span class="badge bg-primary">{{ employee.get_role_display }}</span>
+            </div>
+
+            <div class="mb-2">
+              <strong>Department:</strong> {{ employee.department }}
+            </div>
+
+            <div class="mb-2">
+              <strong>Email:</strong> {{ employee.user.email }}
+            </div>
+
+            {% if employee.phone_extension %}
+              <div class="mb-2">
+                <strong>Phone Extension:</strong> {{ employee.phone_extension }}
+              </div>
+            {% endif %}
+
+            <div class="mb-2">
+              <strong>Hire Date:</strong> {{ employee.hire_date|date:'F d, Y' }}
+            </div>
+
+            <div class="mb-2">
+              <strong>Status:</strong>
+              {% if employee.is_active %}
+                <span class="badge bg-success">Active</span>
+              {% else %}
+                <span class="badge bg-secondary">Inactive</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="card mb-4">
+          <div class="card-header bg-light">
+            <h5 class="mb-0">Capabilities</h5>
+          </div>
+          <div class="card-body">
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                Process Orders{% if employee.can_process_orders %}
+                  <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                {% else %}
+                  <i class="bi bi-x-circle-fill text-danger fs-5"></i>
+                {% endif %}
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                Arrange Flowers{% if employee.can_arrange_flowers %}
+                  <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                {% else %}
+                  <i class="bi bi-x-circle-fill text-danger fs-5"></i>
+                {% endif %}
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                Deliver Orders{% if employee.can_deliver_orders %}
+                  <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                {% else %}
+                  <i class="bi bi-x-circle-fill text-danger fs-5"></i>
+                {% endif %}
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                Manage Staff{% if employee.can_manage_staff %}
+                  <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                {% else %}
+                  <i class="bi bi-x-circle-fill text-danger fs-5"></i>
+                {% endif %}
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-8">
+        <div class="card mb-4">
+          <div class="card-header bg-light">
+            <h5 class="mb-0">Active Assignments</h5>
+          </div>
+          <div class="card-body">
+            {% if active_assignments %}
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Order</th>
+                      <th>Role</th>
+                      <th>Assigned On</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for assignment in active_assignments %}
+                      <tr>
+                        <td>
+                          <a href="{% url 'bloom:order_detail' assignment.order.pk %}">{{ assignment.order.reference_number }}</a>
+                        </td>
+                        <td>{{ assignment.get_role_display }}</td>
+                        <td>{{ assignment.assigned_at|date:'M d, Y H:i' }}</td>
+                        <td>
+                          <form method="post" action="{% url 'bloom:complete_assignment' assignment.pk %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-success"><i class="bi bi-check-lg"></i> Complete</button>
+                          </form>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <div class="alert alert-info">No active assignments found.</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="card mb-4">
+          <div class="card-header bg-light">
+            <h5 class="mb-0">Order History</h5>
+          </div>
+          <div class="card-body">
+            <ul class="nav nav-tabs" id="orderTabs" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="designed-tab" data-bs-toggle="tab" data-bs-target="#designed" type="button" role="tab" aria-controls="designed" aria-selected="true">Designed ({{ designed_orders.count }})</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="delivered-tab" data-bs-toggle="tab" data-bs-target="#delivered" type="button" role="tab" aria-controls="delivered" aria-selected="false">Delivered ({{ delivered_orders.count }})</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="processed-tab" data-bs-toggle="tab" data-bs-target="#processed" type="button" role="tab" aria-controls="processed" aria-selected="false">Processed ({{ processed_orders.count }})</button>
+              </li>
+            </ul>
+
+            <div class="tab-content p-3 border border-top-0 rounded-bottom" id="orderTabsContent">
+              <div class="tab-pane fade show active" id="designed" role="tabpanel" aria-labelledby="designed-tab">
+                {% if designed_orders %}
+                  <div class="table-responsive">
+                    <table class="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>Ref #</th>
+                          <th>Date</th>
+                          <th>Customer</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for order in designed_orders %}
+                          <tr>
+                            <td>
+                              <a href="{% url 'bloom:order_detail' order.pk %}">{{ order.reference_number }}</a>
+                            </td>
+                            <td>{{ order.order_date|date:'M d, Y' }}</td>
+                            <td>{{ order.customer.name }}</td>
+                            <td>
+                              <span class="badge 
+                                                            {% if order.status == 'completed' %}
+                                  
+                                  bg-success
+
+
+                                {% elif order.status == 'cancelled' %}
+                                  
+                                  bg-danger
+
+
+                                {% elif order.status == 'delivery' %}
+                                  
+                                  bg-info
+
+
+                                {% else %}
+                                  
+                                  bg-warning
+
+                                {% endif %}">
+                                {{ order.get_status_display }}
+                              </span>
+                            </td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                {% else %}
+                  <div class="alert alert-info">No orders designed by this employee.</div>
+                {% endif %}
+              </div>
+
+              <div class="tab-pane fade" id="delivered" role="tabpanel" aria-labelledby="delivered-tab">
+                {% if delivered_orders %}
+                  <div class="table-responsive">
+                    <table class="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>Ref #</th>
+                          <th>Date</th>
+                          <th>Customer</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for order in delivered_orders %}
+                          <tr>
+                            <td>
+                              <a href="{% url 'bloom:order_detail' order.pk %}">{{ order.reference_number }}</a>
+                            </td>
+                            <td>{{ order.order_date|date:'M d, Y' }}</td>
+                            <td>{{ order.customer.name }}</td>
+                            <td>
+                              <span class="badge 
+                                                            {% if order.status == 'completed' %}
+                                  
+                                  bg-success
+
+
+                                {% elif order.status == 'cancelled' %}
+                                  
+                                  bg-danger
+
+
+                                {% elif order.status == 'delivery' %}
+                                  
+                                  bg-info
+
+
+                                {% else %}
+                                  
+                                  bg-warning
+
+                                {% endif %}">
+                                {{ order.get_status_display }}
+                              </span>
+                            </td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                {% else %}
+                  <div class="alert alert-info">No orders delivered by this employee.</div>
+                {% endif %}
+              </div>
+
+              <div class="tab-pane fade" id="processed" role="tabpanel" aria-labelledby="processed-tab">
+                {% if processed_orders %}
+                  <div class="table-responsive">
+                    <table class="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>Ref #</th>
+                          <th>Date</th>
+                          <th>Customer</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for order in processed_orders %}
+                          <tr>
+                            <td>
+                              <a href="{% url 'bloom:order_detail' order.pk %}">{{ order.reference_number }}</a>
+                            </td>
+                            <td>{{ order.order_date|date:'M d, Y' }}</td>
+                            <td>{{ order.customer.name }}</td>
+                            <td>
+                              <span class="badge 
+                                                            {% if order.status == 'completed' %}
+                                  
+                                  bg-success
+
+
+                                {% elif order.status == 'cancelled' %}
+                                  
+                                  bg-danger
+
+
+                                {% elif order.status == 'delivery' %}
+                                  
+                                  bg-info
+
+
+                                {% else %}
+                                  
+                                  bg-warning
+
+                                {% endif %}">
+                                {{ order.get_status_display }}
+                              </span>
+                            </td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                {% else %}
+                  <div class="alert alert-info">No orders processed by this employee.</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

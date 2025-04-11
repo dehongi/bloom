@@ -9,6 +9,9 @@ import uuid
 from django.utils import timezone
 from decimal import Decimal
 
+# Import bloom Order model for integration
+# from bloom.models import Order as BloomOrder
+
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -28,6 +31,14 @@ class Category(models.Model):
         null=True,
         blank=True,
         related_name="children",
+    )
+    # Reference to bloom ProductType for synchronization
+    product_type = models.OneToOneField(
+        "bloom.ProductType",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="shop_category",
     )
     featured = models.BooleanField(default=False)
     order = models.IntegerField(default=0)
@@ -216,6 +227,15 @@ class Order(models.Model):
     full_name = models.CharField(max_length=100)
     email = models.EmailField()
     phone = models.CharField(max_length=20)
+
+    # Reference to the corresponding Bloom order (using string reference)
+    bloom_order = models.OneToOneField(
+        "bloom.Order",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="shop_order_link",
+    )
 
     # Shipping details
     address_line_1 = models.CharField(max_length=100)

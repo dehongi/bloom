@@ -118,22 +118,34 @@
                     <td>
                       <span class="badge rounded-pill 
                     {% if order.status == 'new' %}
+                          
                           bg-secondary
 
+
                         {% elif order.status == 'design' %}
+                          
                           bg-primary
 
+
                         {% elif order.status == 'preparation' %}
+                          
                           bg-info
 
+
                         {% elif order.status == 'delivery' %}
+                          
                           bg-warning
 
+
                         {% elif order.status == 'completed' %}
+                          
                           bg-success
 
+
                         {% else %}
+                          
                           bg-danger
+
                         {% endif %}">
                         {{ order.get_status_display }}
                       </span>
@@ -165,6 +177,109 @@
     </div>
   </div>
 
+  <!-- Employee Stats and Recent Updates Row -->
+  <div class="row mb-4">
+    <!-- Top Employees -->
+    <div class="col-lg-6 mb-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-people me-2"></i>Top Staff</h5>
+            <a href="{% url 'bloom:employee_list' %}" class="btn btn-sm btn-outline-primary">View All Staff</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <h6 class="text-muted mb-3">Most active staff members in the last 30 days</h6>
+          {% if top_status_updaters %}
+            <div class="list-group">
+              {% for staff in top_status_updaters %}
+                <div class="list-group-item">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h6 class="mb-0">{{ staff.updated_by_employee__user__first_name }} {{ staff.updated_by_employee__user__last_name }}</h6>
+                    </div>
+                    <span class="badge bg-primary rounded-pill">{{ staff.count }} updates</span>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="alert alert-info">No staff activity data available for the last 30 days.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Status Updates -->
+    <div class="col-lg-6 mb-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white">
+          <h5 class="mb-0"><i class="bi bi-activity me-2"></i>Recent Status Updates</h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Order</th>
+                  <th>New Status</th>
+                  <th>Updated By</th>
+                  <th>Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for update in recent_status_updates %}
+                  <tr>
+                    <td>
+                      <a href="{% url 'bloom:order_detail' update.order.pk %}">{{ update.order.reference_number }}</a>
+                    </td>
+                    <td>
+                      <span class="badge 
+                        {% if update.status == 'completed' %}
+                          bg-success
+
+                        {% elif update.status == 'cancelled' %}
+                          bg-danger
+
+                        {% elif update.status == 'delivery' %}
+                          bg-info
+
+                        {% elif update.status == 'design' %}
+                          bg-primary
+
+                        {% elif update.status == 'preparation' %}
+                          bg-warning
+
+                        {% else %}
+                          bg-secondary
+                        {% endif %}">
+                        {{ update.get_status_display }}
+                      </span>
+                    </td>
+                    <td>
+                      {% if update.updated_by_employee %}
+                        <a href="{% url 'bloom:employee_detail' update.updated_by_employee.pk %}">{{ update.updated_by_employee.user.get_full_name }}</a>
+                      {% else %}
+                        {{ update.updated_by.get_full_name }}
+                      {% endif %}
+                    </td>
+                    <td>
+                      <small>{{ update.timestamp|date:'M d, H:i' }}</small>
+                    </td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="4" class="text-center">No recent status updates.</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Quick Actions -->
   <div class="row mb-4">
     <div class="col-12">
@@ -184,7 +299,7 @@
               <a href="{% url 'bloom:customer_create' %}" class="btn btn-info w-100 py-3 text-white"><i class="bi bi-person-plus me-2"></i>Add Customer</a>
             </div>
             <div class="col-md-3">
-              <a href="{% url 'bloom:order_list' %}?status=new" class="btn btn-warning w-100 py-3 text-white"><i class="bi bi-hourglass-top me-2"></i>View New Orders</a>
+              <a href="{% url 'bloom:employee_create' %}" class="btn btn-warning w-100 py-3 text-white"><i class="bi bi-person-badge me-2"></i>Add Employee</a>
             </div>
           </div>
         </div>

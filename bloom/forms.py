@@ -9,8 +9,11 @@ from .models import (
     OrderItem,
     CustomField,
     OrderStatus,
+    Employee,
+    EmployeeOrderAssignment,
     ContactPerson,
 )
+from accounts.models import CustomUser
 
 
 class BootstrapModelForm(forms.ModelForm):
@@ -243,6 +246,126 @@ class ProductSearchForm(forms.Form):
         queryset=Occasion.objects.all(),
         empty_label="All Occasions",
         widget=forms.Select(attrs={"class": "form-select"}),
+    )
+
+
+class EmployeeForm(BootstrapModelForm):
+    # Explicitly define the user field
+    user = forms.ModelChoiceField(
+        queryset=CustomUser.objects.filter(is_active=True),
+        required=True,
+        label="User",
+        empty_label="Select User",
+    )
+
+    class Meta:
+        model = Employee
+        fields = [
+            "user",
+            "role",
+            "department",
+            "hire_date",
+            "phone_extension",
+            "is_active",
+            "can_process_orders",
+            "can_arrange_flowers",
+            "can_deliver_orders",
+            "can_manage_staff",
+        ]
+        widgets = {
+            "hire_date": forms.DateInput(attrs={"type": "date"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Filter out users who are already employees
+        if self.instance and self.instance.pk:
+            # Editing an existing employee - include their current user in queryset
+            existing_employee_users = Employee.objects.exclude(
+                pk=self.instance.pk
+            ).values_list("user_id", flat=True)
+        else:
+            # Creating a new employee - exclude all existing employee users
+            existing_employee_users = Employee.objects.values_list("user_id", flat=True)
+
+        # Filter users, only showing active users who aren't already employees (except current user when editing)
+        self.fields["user"].queryset = CustomUser.objects.filter(
+            is_active=True
+        ).exclude(id__in=existing_employee_users)
+
+        # If there are no available users, add a helpful message
+        if not self.fields["user"].queryset.exists() and not self.instance.pk:
+            self.fields["user"].empty_label = "No available users - create a new one"
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        # Check if we're creating a new user - if so, make the user field optional
+        if self.data.get("create_new_user") == "true":
+            # Remove the error for the user field if it exists
+            if "user" in self.errors:
+                del self.errors["user"]
+            # Make user field not required
+            self.fields["user"].required = False
+
+        return cleaned_data
+
+
+class EmployeeSearchForm(forms.Form):
+    search = forms.CharField(
+        required=False,
+        widget=forms.TextInput(
+            attrs={"class": "form-control", "placeholder": "Search employees..."}
+        ),
+    )
+    role = forms.ChoiceField(
+        required=False,
+        choices=[("", "All Roles")] + Employee.ROLE_CHOICES,
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+    department = forms.CharField(
+        required=False,
+        widget=forms.TextInput(
+            attrs={"class": "form-control", "placeholder": "Department"}
+        ),
+    )
+    is_active = forms.NullBooleanField(
+        required=False,
+        widget=forms.Select(
+            attrs={"class": "form-select"},
+            choices=[
+                ("", "All Employees"),
+                (True, "Active Employees"),
+                (False, "Inactive Employees"),
+            ],
+        ),
+    )
+
+
+class EmployeeOrderAssignmentForm(BootstrapModelForm):
+    class Meta:
+        model = EmployeeOrderAssignment
+        fields = ["employee", "role", "notes"]
+        widgets = {
+            "notes": forms.Textarea(attrs={"rows": 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Filter employees by capabilities based on role
+        self.fields["employee"].queryset = Employee.objects.filter(is_active=True)
+
+        # Set up role-based filtering dynamically via JavaScript
+        self.fields["role"].widget.attrs.update(
+            {
+                "class": "form-select role-selector",
+                "data-designer-filter": "can_arrange_flowers",
+                "data-delivery-filter": "can_deliver_orders",
+                "data-processor-filter": "can_process_orders",
+                "data-manager-filter": "can_manage_staff",
+            }
+        )
     )
 
 

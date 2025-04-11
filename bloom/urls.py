@@ -40,6 +40,24 @@ urlpatterns = [
         views.ContactPersonDeleteView.as_view(),
         name="contact_person_delete",
     ),
+    # Employee URLs
+    path("employees/", views.EmployeeListView.as_view(), name="employee_list"),
+    path("employees/new/", views.EmployeeCreateView.as_view(), name="employee_create"),
+    path(
+        "employees/<int:pk>/",
+        views.EmployeeDetailView.as_view(),
+        name="employee_detail",
+    ),
+    path(
+        "employees/<int:pk>/edit/",
+        views.EmployeeUpdateView.as_view(),
+        name="employee_update",
+    ),
+    path(
+        "employees/<int:pk>/delete/",
+        views.EmployeeDeleteView.as_view(),
+        name="employee_delete",
+    ),
     # Occasion URLs
     path("occasions/", views.OccasionListView.as_view(), name="occasion_list"),
     path("occasions/new/", views.OccasionCreateView.as_view(), name="occasion_create"),
@@ -121,6 +139,17 @@ urlpatterns = [
         "orders/<int:pk>/update-status/",
         views.UpdateOrderStatusView.as_view(),
         name="update_order_status",
+    ),
+    # Order Employee Assignment URLs
+    path(
+        "orders/<int:order_pk>/assign-employee/",
+        views.AssignEmployeeToOrderView.as_view(),
+        name="assign_employee_to_order",
+    ),
+    path(
+        "assignments/<int:pk>/complete/",
+        views.CompleteAssignmentView.as_view(),
+        name="complete_assignment",
     ),
     # Custom Field URLs
     path(
