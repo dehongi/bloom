@@ -1,0 +1,86 @@
+[
+    {
+        "model": "bloom.employeeorderassignment",
+        "pk": 1,
+        "fields": {
+            "employee": 2,
+            "order": 1,
+            "role": "designer",
+            "assigned_at": "2023-04-01T11:00:00Z",
+            "assigned_by": 1,
+            "completed": true,
+            "completed_at": "2023-04-02T15:30:00Z",
+            "notes": "Completed design for birthday arrangement"
+        }
+    },
+    {
+        "model": "bloom.employeeorderassignment",
+        "pk": 2,
+        "fields": {
+            "employee": 4,
+            "order": 1,
+            "role": "delivery",
+            "assigned_at": "2023-04-03T09:00:00Z",
+            "assigned_by": 1,
+            "completed": true,
+            "completed_at": "2023-04-03T13:45:00Z",
+            "notes": "Delivered to customer"
+        }
+    },
+    {
+        "model": "bloom.employeeorderassignment",
+        "pk": 3,
+        "fields": {
+            "employee": 2,
+            "order": 2,
+            "role": "designer",
+            "assigned_at": "2023-04-02T10:00:00Z",
+            "assigned_by": 1,
+            "completed": false,
+            "completed_at": null,
+            "notes": "Working on anniversary arrangement"
+        }
+    },
+    {
+        "model": "bloom.employeeorderassignment",
+        "pk": 4,
+        "fields": {
+            "employee": 3,
+            "order": 4,
+            "role": "arranger",
+            "assigned_at": "2023-04-07T15:00:00Z",
+            "assigned_by": 1,
+            "completed": false,
+            "completed_at": null,
+            "notes": "Special wedding arrangement in progress"
+        }
+    },
+    {
+        "model": "bloom.employeeorderassignment",
+        "pk": 5,
+        "fields": {
+            "employee": 3,
+            "order": 5,
+            "role": "arranger",
+            "assigned_at": "2023-04-08T08:30:00Z",
+            "assigned_by": 1,
+            "completed": true,
+            "completed_at": "2023-04-08T10:15:00Z",
+            "notes": "Graduation arrangement completed"
+        }
+    },
+    {
+        "model": "bloom.employeeorderassignment",
+        "pk": 6,
+        "fields": {
+            "employee": 4,
+            "order": 5,
+            "role": "delivery",
+            "assigned_at": "2023-04-08T10:30:00Z",
+            "assigned_by": 1,
+            "completed": true,
+            "completed_at": "2023-04-08T11:15:00Z",
+            "notes": "Customer picked up from store"
+        }
+    }
+]

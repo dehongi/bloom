@@ -52,5 +52,23 @@
             "groups": [],
             "user_permissions": []
         }
+    },
+    {
+        "model": "accounts.customuser",
+        "pk": 4,
+        "fields": {
+            "password": "pbkdf2_sha256$720000$iRpnMXgMHTYiUU1rABGNvr$w7Nm8YYGmf2nNDgNYbQvEw5TgXrQ2d3hDGXN0nPiKcU=",
+            "last_login": "2023-04-08T12:00:00Z",
+            "is_superuser": false,
+            "first_name": "Delivery",
+            "last_name": "Person",
+            "is_staff": true,
+            "is_active": true,
+            "date_joined": "2023-04-01T12:00:00Z",
+            "bio": "Delivery staff",
+            "email": "delivery@example.com",
+            "groups": [],
+            "user_permissions": []
+        }
     }
 ]

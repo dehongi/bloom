@@ -12,7 +12,12 @@
             "state": "NY",
             "country": "USA",
             "postal_code": "10001",
-            "external_id": "CUST-001"
+            "external_id": "CUST-001",
+            "contact_type": "customer",
+            "company_name": "",
+            "notes": "",
+            "created_at": "2023-01-15T10:30:00Z",
+            "updated_at": "2023-01-15T10:30:00Z"
         }
     },
     {
@@ -28,7 +33,12 @@
             "state": "CA",
             "country": "USA",
             "postal_code": "90001",
-            "external_id": "CUST-002"
+            "external_id": "CUST-002",
+            "contact_type": "customer",
+            "company_name": "",
+            "notes": "",
+            "created_at": "2023-01-20T14:45:00Z",
+            "updated_at": "2023-01-20T14:45:00Z"
         }
     },
     {
@@ -44,7 +54,12 @@
             "state": "IL",
             "country": "USA",
             "postal_code": "60007",
-            "external_id": "CUST-003"
+            "external_id": "CUST-003",
+            "contact_type": "customer",
+            "company_name": "",
+            "notes": "",
+            "created_at": "2023-01-25T09:15:00Z",
+            "updated_at": "2023-01-25T09:15:00Z"
         }
     },
     {
@@ -60,7 +75,12 @@
             "state": "WA",
             "country": "USA",
             "postal_code": "98101",
-            "external_id": "CUST-004"
+            "external_id": "CUST-004",
+            "contact_type": "customer",
+            "company_name": "Johnson Enterprises",
+            "notes": "Corporate client - monthly arrangement subscription",
+            "created_at": "2023-02-03T11:30:00Z",
+            "updated_at": "2023-02-03T11:30:00Z"
         }
     },
     {
@@ -76,7 +96,12 @@
             "state": "MA",
             "country": "USA",
             "postal_code": "02108",
-            "external_id": "CUST-005"
+            "external_id": "CUST-005",
+            "contact_type": "customer",
+            "company_name": "",
+            "notes": "",
+            "created_at": "2023-02-10T16:20:00Z",
+            "updated_at": "2023-02-10T16:20:00Z"
         }
     }
 ]
