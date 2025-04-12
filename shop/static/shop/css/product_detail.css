@@ -1,0 +1,30 @@
+.product-gallery-thumb {
+    cursor: pointer;
+    border: 2px solid transparent;
+  }
+  .product-gallery-thumb:hover,
+  .product-gallery-thumb.active {
+    border-color: var(--bs-primary);
+  }
+  .product-image-container {
+    height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background-color: #f8f9fa;
+  }
+  .product-image-container img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+  }
+  .star-rating {
+    color: gold;
+  }
+  .review-form {
+    display: none;
+  }
+  .review-form.active {
+    display: block;
+  }
