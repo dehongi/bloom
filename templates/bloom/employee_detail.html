@@ -188,29 +188,11 @@
                             <td>{{ order.order_date|date:'M d, Y' }}</td>
                             <td>{{ order.customer.name }}</td>
                             <td>
-                              <span class="badge 
-                                                            {% if order.status == 'completed' %}
-                                  
-                                  bg-success
-
-
-                                {% elif order.status == 'cancelled' %}
-                                  
-                                  bg-danger
-
-
-                                {% elif order.status == 'delivery' %}
-                                  
-                                  bg-info
-
-
-                                {% else %}
-                                  
-                                  bg-warning
-
-                                {% endif %}">
+                              {# prettier-ignore-start #}
+                              <span class="badge {% if order.status == 'completed' %}bg-success{% elif order.status == 'cancelled' %}bg-danger{% elif order.status == 'delivery' %}bg-info{% else %}bg-warning{% endif %}">
                                 {{ order.get_status_display }}
                               </span>
+                              {# prettier-ignore-end #}
                             </td>
                           </tr>
                         {% endfor %}
@@ -243,29 +225,11 @@
                             <td>{{ order.order_date|date:'M d, Y' }}</td>
                             <td>{{ order.customer.name }}</td>
                             <td>
-                              <span class="badge 
-                                                            {% if order.status == 'completed' %}
-                                  
-                                  bg-success
-
-
-                                {% elif order.status == 'cancelled' %}
-                                  
-                                  bg-danger
-
-
-                                {% elif order.status == 'delivery' %}
-                                  
-                                  bg-info
-
-
-                                {% else %}
-                                  
-                                  bg-warning
-
-                                {% endif %}">
+                              {# prettier-ignore-start #}
+                              <span class="badge {% if order.status == 'completed' %}bg-success{% elif order.status == 'cancelled' %}bg-danger{% elif order.status == 'delivery' %}bg-info{% else %}bg-warning{% endif %}">
                                 {{ order.get_status_display }}
                               </span>
+                              {# prettier-ignore-end #}
                             </td>
                           </tr>
                         {% endfor %}
@@ -298,29 +262,11 @@
                             <td>{{ order.order_date|date:'M d, Y' }}</td>
                             <td>{{ order.customer.name }}</td>
                             <td>
-                              <span class="badge 
-                                                            {% if order.status == 'completed' %}
-                                  
-                                  bg-success
-
-
-                                {% elif order.status == 'cancelled' %}
-                                  
-                                  bg-danger
-
-
-                                {% elif order.status == 'delivery' %}
-                                  
-                                  bg-info
-
-
-                                {% else %}
-                                  
-                                  bg-warning
-
-                                {% endif %}">
+                              {# prettier-ignore-start #}
+                              <span class="badge {% if order.status == 'completed' %}bg-success{% elif order.status == 'cancelled' %}bg-danger{% elif order.status == 'delivery' %}bg-info{% else %}bg-warning{% endif %}">
                                 {{ order.get_status_display }}
                               </span>
+                              {# prettier-ignore-end #}
                             </td>
                           </tr>
                         {% endfor %}

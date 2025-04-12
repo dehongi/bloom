@@ -1,6 +1,14 @@
 {% extends 'bloom/base.html' %}
 {% load static %}
 
+{% block title %}
+  {% if customer.pk %}
+    Edit Customer
+  {% else %}
+    New Customer
+  {% endif %}
+{% endblock %}
+
 {% block bloom_content %}
   <div class="row mb-4">
     <div class="col-12">

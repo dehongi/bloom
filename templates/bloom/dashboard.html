@@ -1,6 +1,10 @@
 {% extends 'bloom/base.html' %}
 {% load static %}
 
+{% block title %}
+  Dashboard
+{% endblock %}
+
 {% block bloom_content %}
   <div class="row mb-4">
     <div class="col-12">
@@ -11,6 +15,11 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Hidden data for JavaScript -->
+  <div class="d-none">
+    <div id="status-counts-data">{{ status_counts|safe }}</div>
   </div>
 
   <!-- Statistics Cards -->
@@ -116,39 +125,11 @@
                     <td>{{ order.customer.name }}</td>
                     <td>{{ order.order_date }}</td>
                     <td>
-                      <span class="badge rounded-pill 
-                    {% if order.status == 'new' %}
-                          
-                          bg-secondary
-
-
-                        {% elif order.status == 'design' %}
-                          
-                          bg-primary
-
-
-                        {% elif order.status == 'preparation' %}
-                          
-                          bg-info
-
-
-                        {% elif order.status == 'delivery' %}
-                          
-                          bg-warning
-
-
-                        {% elif order.status == 'completed' %}
-                          
-                          bg-success
-
-
-                        {% else %}
-                          
-                          bg-danger
-
-                        {% endif %}">
+                      {# prettier-ignore-start #}
+                      <span class="badge rounded-pill {% if order.status == 'new' %}bg-secondary{% elif order.status == 'design' %}bg-primary{% elif order.status == 'preparation' %}bg-info{% elif order.status == 'delivery' %}bg-warning{% elif order.status == 'completed' %}bg-success{% else %}bg-danger{% endif %}">
                         {{ order.get_status_display }}
                       </span>
+                      {# prettier-ignore-end #}
                     </td>
                     <td>${{ order.total }}</td>
                   </tr>
@@ -234,27 +215,11 @@
                       <a href="{% url 'bloom:order_detail' update.order.pk %}">{{ update.order.reference_number }}</a>
                     </td>
                     <td>
-                      <span class="badge 
-                        {% if update.status == 'completed' %}
-                          bg-success
-
-                        {% elif update.status == 'cancelled' %}
-                          bg-danger
-
-                        {% elif update.status == 'delivery' %}
-                          bg-info
-
-                        {% elif update.status == 'design' %}
-                          bg-primary
-
-                        {% elif update.status == 'preparation' %}
-                          bg-warning
-
-                        {% else %}
-                          bg-secondary
-                        {% endif %}">
+                      {# prettier-ignore-start #}
+                      <span class="badge {% if update.status == 'completed' %}bg-success{% elif update.status == 'cancelled' %}bg-danger{% elif update.status == 'delivery' %}bg-info{% elif update.status == 'design' %}bg-primary{% elif update.status == 'preparation' %}bg-warning{% else %}bg-secondary{% endif %}">
                         {{ update.get_status_display }}
                       </span>
+                      {# prettier-ignore-end #}
                     </td>
                     <td>
                       {% if update.updated_by_employee %}
@@ -311,51 +276,5 @@
 {% block extra_js %}
   {{ block.super }}
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Order Status Chart
-    const statusCounts = {{ status_counts|safe }};
-    
-    // Extract labels and data from status_counts
-    let labels = [];
-    let data = [];
-    let backgroundColors = [];
-    
-    const colorMap = {
-      'new': '#6c757d',       // secondary
-      'design': '#0d6efd',    // primary
-      'preparation': '#0dcaf0', // info
-      'delivery': '#ffc107',  // warning
-      'completed': '#198754', // success
-      'cancelled': '#dc3545'  // danger
-    };
-    
-    statusCounts.forEach(function(item) {
-      labels.push(item.status.charAt(0).toUpperCase() + item.status.slice(1));
-      data.push(item.count);
-      backgroundColors.push(colorMap[item.status] || '#6c757d');
-    });
-    
-    const ctx = document.getElementById('orderStatusChart').getContext('2d');
-    new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: labels,
-        datasets: [{
-          data: data,
-          backgroundColor: backgroundColors,
-          hoverOffset: 4
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: 'bottom',
-          }
-        }
-      }
-    });
-  });
-</script>
+  <script src="{% static 'bloom/js/dashboard.js' %}"></script>
 {% endblock %}

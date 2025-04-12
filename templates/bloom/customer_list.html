@@ -1,6 +1,10 @@
 {% extends 'bloom/base.html' %}
 {% load static %}
 
+{% block title %}
+  Customers
+{% endblock %}
+
 {% block bloom_content %}
   <div class="row mb-4">
     <div class="col-12">
@@ -90,22 +94,20 @@
               <ul class="pagination justify-content-center">
                 {% if page_obj.has_previous %}
                   <li class="page-item">
+                    {# prettier-ignore-start}
                     <a class="page-link"
-                      href="?page=1{% if search_term %}
-                        
-                        &search={{ search_term }}
-                      {% endif %}">
+                      href="?page=1{% if search_term %}&search={{ search_term }}{% endif %}">
                       &laquo; First
                     </a>
+                    {# prettier-ignore-end #}
                   </li>
                   <li class="page-item">
+                    {# prettier-ignore-start #}
                     <a class="page-link"
-                      href="?page={{ page_obj.previous_page_number }}{% if search_term %}
-                        
-                        &search={{ search_term }}
-                      {% endif %}">
+                      href="?page={{ page_obj.previous_page_number }}{% if search_term %}&search={{ search_term }}{% endif %}">
                       Previous
                     </a>
+                    {# prettier-ignore-end #}
                   </li>
                 {% endif %}
 
@@ -115,22 +117,20 @@
 
                 {% if page_obj.has_next %}
                   <li class="page-item">
+                    {# prettier-ignore-start #}
                     <a class="page-link"
-                      href="?page={{ page_obj.next_page_number }}{% if search_term %}
-                        
-                        &search={{ search_term }}
-                      {% endif %}">
+                      href="?page={{ page_obj.next_page_number }}{% if search_term %}&search={{ search_term }}{% endif %}">
                       Next
                     </a>
+                    {# prettier-ignore-end #}
                   </li>
                   <li class="page-item">
+                    {# prettier-ignore-start #}
                     <a class="page-link"
-                      href="?page={{ page_obj.paginator.num_pages }}{% if search_term %}
-                        
-                        &search={{ search_term }}
-                      {% endif %}">
+                      href="?page={{ page_obj.paginator.num_pages }}{% if search_term %}&search={{ search_term }}{% endif %}">
                       Last &raquo;
                     </a>
+                    {# prettier-ignore-end #}
                   </li>
                 {% endif %}
               </ul>

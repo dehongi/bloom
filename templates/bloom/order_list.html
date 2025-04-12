@@ -1,6 +1,10 @@
 {% extends 'bloom/base.html' %}
 {% load static %}
 
+{% block title %}
+  Orders
+{% endblock %}
+
 {% block bloom_content %}
   <div class="row mb-4">
     <div class="col-12">
@@ -53,27 +57,11 @@
                     <td>{{ order.order_date }}</td>
                     <td>{{ order.shipment_date }}</td>
                     <td>
-                      <span class="badge rounded-pill 
-                    {% if order.status == 'new' %}
-                          bg-secondary
-
-                        {% elif order.status == 'design' %}
-                          bg-primary
-
-                        {% elif order.status == 'preparation' %}
-                          bg-info
-
-                        {% elif order.status == 'delivery' %}
-                          bg-warning
-
-                        {% elif order.status == 'completed' %}
-                          bg-success
-
-                        {% else %}
-                          bg-danger
-                        {% endif %}">
+                      {# prettier-ignore-start #}
+                      <span class="badge rounded-pill {% if order.status == 'new' %}bg-secondary{% elif order.status == 'design' %}bg-primary{% elif order.status == 'preparation' %}bg-info{% elif order.status == 'delivery' %}bg-warning{% elif order.status == 'completed' %}bg-success{% else %}bg-danger{% endif %}">
                         {{ order.get_status_display }}
                       </span>
+                      {# prettier-ignore-end #}
                     </td>
                     <td>${{ order.total }}</td>
                     <td>
@@ -106,32 +94,20 @@
               <ul class="pagination justify-content-center">
                 {% if page_obj.has_previous %}
                   <li class="page-item">
+                    {# prettier-ignore-start #}
                     <a class="page-link"
-                      href="?page=1{% if request.GET.search %}
-                        &search={{ request.GET.search }}
-                      {% endif %}{% if request.GET.status %}
-                        &status={{ request.GET.status }}
-                      {% endif %}{% if request.GET.from_date %}
-                        &from_date={{ request.GET.from_date }}
-                      {% endif %}{% if request.GET.to_date %}
-                        &to_date={{ request.GET.to_date }}
-                      {% endif %}">
+                      href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.from_date %}&from_date={{ request.GET.from_date }}{% endif %}{% if request.GET.to_date %}&to_date={{ request.GET.to_date }}{% endif %}">
                       &laquo; First
                     </a>
+                    {# prettier-ignore-end #}
                   </li>
                   <li class="page-item">
+                    {# prettier-ignore-start #}
                     <a class="page-link"
-                      href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}
-                        &search={{ request.GET.search }}
-                      {% endif %}{% if request.GET.status %}
-                        &status={{ request.GET.status }}
-                      {% endif %}{% if request.GET.from_date %}
-                        &from_date={{ request.GET.from_date }}
-                      {% endif %}{% if request.GET.to_date %}
-                        &to_date={{ request.GET.to_date }}
-                      {% endif %}">
+                      href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.from_date %}&from_date={{ request.GET.from_date }}{% endif %}{% if request.GET.to_date %}&to_date={{ request.GET.to_date }}{% endif %}">
                       Previous
                     </a>
+                    {# prettier-ignore-end #}
                   </li>
                 {% endif %}
 
@@ -141,32 +117,20 @@
 
                 {% if page_obj.has_next %}
                   <li class="page-item">
+                    {# prettier-ignore-start #}
                     <a class="page-link"
-                      href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}
-                        &search={{ request.GET.search }}
-                      {% endif %}{% if request.GET.status %}
-                        &status={{ request.GET.status }}
-                      {% endif %}{% if request.GET.from_date %}
-                        &from_date={{ request.GET.from_date }}
-                      {% endif %}{% if request.GET.to_date %}
-                        &to_date={{ request.GET.to_date }}
-                      {% endif %}">
+                      href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.from_date %}&from_date={{ request.GET.from_date }}{% endif %}{% if request.GET.to_date %}&to_date={{ request.GET.to_date }}{% endif %}">
                       Next
                     </a>
+                    {# prettier-ignore-end #}
                   </li>
                   <li class="page-item">
+                    {# prettier-ignore-start #}
                     <a class="page-link"
-                      href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}
-                        &search={{ request.GET.search }}
-                      {% endif %}{% if request.GET.status %}
-                        &status={{ request.GET.status }}
-                      {% endif %}{% if request.GET.from_date %}
-                        &from_date={{ request.GET.from_date }}
-                      {% endif %}{% if request.GET.to_date %}
-                        &to_date={{ request.GET.to_date }}
-                      {% endif %}">
+                      href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.from_date %}&from_date={{ request.GET.from_date }}{% endif %}{% if request.GET.to_date %}&to_date={{ request.GET.to_date }}{% endif %}">
                       Last &raquo;
                     </a>
+                    {# prettier-ignore-end #}
                   </li>
                 {% endif %}
               </ul>

@@ -1,6 +1,14 @@
 {% extends 'bloom/base.html' %}
 {% load static %}
 
+{% block title %}
+  {% if contact_person.pk %}
+    Edit Contact Person
+  {% else %}
+    Add Contact Person
+  {% endif %}
+{% endblock %}
+
 {% block bloom_content %}
   <div class="row mb-4">
     <div class="col-md-8 mx-auto">

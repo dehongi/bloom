@@ -1,6 +1,10 @@
 {% extends 'bloom/base.html' %}
 {% load static %}
 
+{% block title %}
+  {{ customer.name }}
+{% endblock %}
+
 {% block bloom_content %}
   <div class="row mb-4">
     <div class="col-12">
@@ -154,15 +158,11 @@
                       <td>{{ order.order_date }}</td>
                       <td>{{ order.shipment_date }}</td>
                       <td>
-                        <span class="badge {% if order.status == 'completed' %}
-                            bg-success
-                          {% elif order.status == 'cancelled' %}
-                            bg-danger
-                          {% else %}
-                            bg-primary
-                          {% endif %}">
+                        {# prettier-ignore-start #}
+                        <span class="badge {% if order.status == 'completed' %}bg-success{% elif order.status == 'cancelled' %}bg-danger{% else %}bg-primary{% endif %}">
                           {{ order.get_status_display }}
                         </span>
+                        {# prettier-ignore-end #}
                       </td>
                       <td>${{ order.total }}</td>
                       <td>
