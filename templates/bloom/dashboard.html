@@ -6,265 +6,267 @@
 {% endblock %}
 
 {% block bloom_content %}
-  <div class="row mb-4">
-    <div class="col-12">
-      <div class="card border-0 shadow-sm">
-        <div class="card-body">
-          <h3 class="card-title"><i class="bi bi-speedometer2 me-2"></i>Dashboard</h3>
-          <p class="text-muted">Welcome to the Bloom Flower Shop management system.</p>
+  <div class="pe-3 w-100">
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <h3 class="card-title"><i class="bi bi-speedometer2 me-2"></i>Dashboard</h3>
+            <p class="text-muted">Welcome to the Bloom Flower Shop management system.</p>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Hidden data for JavaScript -->
-  <div class="d-none">
-    <div id="status-counts-data">{{ status_counts|safe }}</div>
-  </div>
+    <!-- Hidden data for JavaScript -->
+    <div class="d-none">
+      <div id="status-counts-data">{{ status_counts|safe }}</div>
+    </div>
 
-  <!-- Statistics Cards -->
-  <div class="row mb-4">
-    <div class="col-md-3">
-      <div class="card border-0 shadow-sm text-white bg-primary mb-3">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="card-title mb-0">Total Orders</h6>
-              <h2 class="my-2">{{ total_orders }}</h2>
-              <p class="card-text mb-0">All time orders</p>
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-white bg-primary mb-3">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="card-title mb-0">Total Orders</h6>
+                <h2 class="my-2">{{ total_orders }}</h2>
+                <p class="card-text mb-0">All time orders</p>
+              </div>
+              <div>
+                <i class="bi bi-bag-check fs-1"></i>
+              </div>
             </div>
-            <div>
-              <i class="bi bi-bag-check fs-1"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-white bg-warning mb-3">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="card-title mb-0">Pending Orders</h6>
+                <h2 class="my-2">{{ pending_orders }}</h2>
+                <p class="card-text mb-0">In processing</p>
+              </div>
+              <div>
+                <i class="bi bi-hourglass-split fs-1"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-white bg-info mb-3">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="card-title mb-0">Delivery</h6>
+                <h2 class="my-2">{{ delivery_orders }}</h2>
+                <p class="card-text mb-0">On delivery</p>
+              </div>
+              <div>
+                <i class="bi bi-truck fs-1"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-white bg-success mb-3">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="card-title mb-0">Completed</h6>
+                <h2 class="my-2">{{ completed_orders }}</h2>
+                <p class="card-text mb-0">Delivered orders</p>
+              </div>
+              <div>
+                <i class="bi bi-check-circle fs-1"></i>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="col-md-3">
-      <div class="card border-0 shadow-sm text-white bg-warning mb-3">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="card-title mb-0">Pending Orders</h6>
-              <h2 class="my-2">{{ pending_orders }}</h2>
-              <p class="card-text mb-0">In processing</p>
-            </div>
-            <div>
-              <i class="bi bi-hourglass-split fs-1"></i>
+    <!-- Recent Orders and Charts Row -->
+    <div class="row">
+      <!-- Recent Orders -->
+      <div class="col-lg-8 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Recent Orders</h5>
+              <a href="{% url 'bloom:order_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-3">
-      <div class="card border-0 shadow-sm text-white bg-info mb-3">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="card-title mb-0">Delivery</h6>
-              <h2 class="my-2">{{ delivery_orders }}</h2>
-              <p class="card-text mb-0">On delivery</p>
-            </div>
-            <div>
-              <i class="bi bi-truck fs-1"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-3">
-      <div class="card border-0 shadow-sm text-white bg-success mb-3">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="card-title mb-0">Completed</h6>
-              <h2 class="my-2">{{ completed_orders }}</h2>
-              <p class="card-text mb-0">Delivered orders</p>
-            </div>
-            <div>
-              <i class="bi bi-check-circle fs-1"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Recent Orders and Charts Row -->
-  <div class="row">
-    <!-- Recent Orders -->
-    <div class="col-lg-8 mb-4">
-      <div class="card border-0 shadow-sm h-100">
-        <div class="card-header bg-white">
-          <div class="d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Recent Orders</h5>
-            <a href="{% url 'bloom:order_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-hover">
-              <thead>
-                <tr>
-                  <th>Reference</th>
-                  <th>Customer</th>
-                  <th>Date</th>
-                  <th>Status</th>
-                  <th>Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for order in recent_orders %}
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
                   <tr>
-                    <td>
-                      <a href="{% url 'bloom:order_detail' order.pk %}">{{ order.reference_number }}</a>
-                    </td>
-                    <td>{{ order.customer.name }}</td>
-                    <td>{{ order.order_date }}</td>
-                    <td>
-                      {# prettier-ignore-start #}
+                    <th>Reference</th>
+                    <th>Customer</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for order in recent_orders %}
+                    <tr>
+                      <td>
+                        <a href="{% url 'bloom:order_detail' order.pk %}">{{ order.reference_number }}</a>
+                      </td>
+                      <td>{{ order.customer.name }}</td>
+                      <td>{{ order.order_date }}</td>
+                      <td>
+                        {# prettier-ignore-start #}
                       <span class="badge rounded-pill {% if order.status == 'new' %}bg-secondary{% elif order.status == 'design' %}bg-primary{% elif order.status == 'preparation' %}bg-info{% elif order.status == 'delivery' %}bg-warning{% elif order.status == 'completed' %}bg-success{% else %}bg-danger{% endif %}">
                         {{ order.get_status_display }}
                       </span>
                       {# prettier-ignore-end #}
-                    </td>
-                    <td>${{ order.total }}</td>
-                  </tr>
-                {% empty %}
-                  <tr>
-                    <td colspan="5" class="text-center">No orders found.</td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Order Status Chart -->
-    <div class="col-lg-4 mb-4">
-      <div class="card border-0 shadow-sm h-100">
-        <div class="card-header bg-white">
-          <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Order Status</h5>
-        </div>
-        <div class="card-body">
-          <canvas id="orderStatusChart" height="250"></canvas>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Employee Stats and Recent Updates Row -->
-  <div class="row mb-4">
-    <!-- Top Employees -->
-    <div class="col-lg-6 mb-4">
-      <div class="card border-0 shadow-sm h-100">
-        <div class="card-header bg-white">
-          <div class="d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="bi bi-people me-2"></i>Top Staff</h5>
-            <a href="{% url 'bloom:employee_list' %}" class="btn btn-sm btn-outline-primary">View All Staff</a>
-          </div>
-        </div>
-        <div class="card-body">
-          <h6 class="text-muted mb-3">Most active staff members in the last 30 days</h6>
-          {% if top_status_updaters %}
-            <div class="list-group">
-              {% for staff in top_status_updaters %}
-                <div class="list-group-item">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                      <h6 class="mb-0">{{ staff.updated_by_employee__user__first_name }} {{ staff.updated_by_employee__user__last_name }}</h6>
-                    </div>
-                    <span class="badge bg-primary rounded-pill">{{ staff.count }} updates</span>
-                  </div>
-                </div>
-              {% endfor %}
+                      </td>
+                      <td>${{ order.total }}</td>
+                    </tr>
+                  {% empty %}
+                    <tr>
+                      <td colspan="5" class="text-center">No orders found.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
             </div>
-          {% else %}
-            <div class="alert alert-info">No staff activity data available for the last 30 days.</div>
-          {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Status Chart -->
+      <div class="col-lg-4 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Order Status</h5>
+          </div>
+          <div class="card-body">
+            <canvas id="orderStatusChart" height="250"></canvas>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Recent Status Updates -->
-    <div class="col-lg-6 mb-4">
-      <div class="card border-0 shadow-sm h-100">
-        <div class="card-header bg-white">
-          <h5 class="mb-0"><i class="bi bi-activity me-2"></i>Recent Status Updates</h5>
+    <!-- Employee Stats and Recent Updates Row -->
+    <div class="row mb-4">
+      <!-- Top Employees -->
+      <div class="col-lg-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0"><i class="bi bi-people me-2"></i>Top Staff</h5>
+              <a href="{% url 'bloom:employee_list' %}" class="btn btn-sm btn-outline-primary">View All Staff</a>
+            </div>
+          </div>
+          <div class="card-body">
+            <h6 class="text-muted mb-3">Most active staff members in the last 30 days</h6>
+            {% if top_status_updaters %}
+              <div class="list-group">
+                {% for staff in top_status_updaters %}
+                  <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <h6 class="mb-0">{{ staff.updated_by_employee__user__first_name }} {{ staff.updated_by_employee__user__last_name }}</h6>
+                      </div>
+                      <span class="badge bg-primary rounded-pill">{{ staff.count }} updates</span>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="alert alert-info">No staff activity data available for the last 30 days.</div>
+            {% endif %}
+          </div>
         </div>
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-sm">
-              <thead>
-                <tr>
-                  <th>Order</th>
-                  <th>New Status</th>
-                  <th>Updated By</th>
-                  <th>Time</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for update in recent_status_updates %}
+      </div>
+
+      <!-- Recent Status Updates -->
+      <div class="col-lg-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="bi bi-activity me-2"></i>Recent Status Updates</h5>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <thead>
                   <tr>
-                    <td>
-                      <a href="{% url 'bloom:order_detail' update.order.pk %}">{{ update.order.reference_number }}</a>
-                    </td>
-                    <td>
-                      {# prettier-ignore-start #}
+                    <th>Order</th>
+                    <th>New Status</th>
+                    <th>Updated By</th>
+                    <th>Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for update in recent_status_updates %}
+                    <tr>
+                      <td>
+                        <a href="{% url 'bloom:order_detail' update.order.pk %}">{{ update.order.reference_number }}</a>
+                      </td>
+                      <td>
+                        {# prettier-ignore-start #}
                       <span class="badge {% if update.status == 'completed' %}bg-success{% elif update.status == 'cancelled' %}bg-danger{% elif update.status == 'delivery' %}bg-info{% elif update.status == 'design' %}bg-primary{% elif update.status == 'preparation' %}bg-warning{% else %}bg-secondary{% endif %}">
                         {{ update.get_status_display }}
                       </span>
                       {# prettier-ignore-end #}
-                    </td>
-                    <td>
-                      {% if update.updated_by_employee %}
-                        <a href="{% url 'bloom:employee_detail' update.updated_by_employee.pk %}">{{ update.updated_by_employee.user.get_full_name }}</a>
-                      {% else %}
-                        {{ update.updated_by.get_full_name }}
-                      {% endif %}
-                    </td>
-                    <td>
-                      <small>{{ update.timestamp|date:'M d, H:i' }}</small>
-                    </td>
-                  </tr>
-                {% empty %}
-                  <tr>
-                    <td colspan="4" class="text-center">No recent status updates.</td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+                      </td>
+                      <td>
+                        {% if update.updated_by_employee %}
+                          <a href="{% url 'bloom:employee_detail' update.updated_by_employee.pk %}">{{ update.updated_by_employee.user.get_full_name }}</a>
+                        {% else %}
+                          {{ update.updated_by.get_full_name }}
+                        {% endif %}
+                      </td>
+                      <td>
+                        <small>{{ update.timestamp|date:'M d, H:i' }}</small>
+                      </td>
+                    </tr>
+                  {% empty %}
+                    <tr>
+                      <td colspan="4" class="text-center">No recent status updates.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Quick Actions -->
-  <div class="row mb-4">
-    <div class="col-12">
-      <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white">
-          <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>Quick Actions</h5>
-        </div>
-        <div class="card-body">
-          <div class="row g-3">
-            <div class="col-md-3">
-              <a href="{% url 'bloom:order_create' %}" class="btn btn-primary w-100 py-3"><i class="bi bi-plus-circle me-2"></i>New Order</a>
-            </div>
-            <div class="col-md-3">
-              <a href="{% url 'bloom:product_create' %}" class="btn btn-success w-100 py-3"><i class="bi bi-plus-circle me-2"></i>Add Product</a>
-            </div>
-            <div class="col-md-3">
-              <a href="{% url 'bloom:customer_create' %}" class="btn btn-info w-100 py-3 text-white"><i class="bi bi-person-plus me-2"></i>Add Customer</a>
-            </div>
-            <div class="col-md-3">
-              <a href="{% url 'bloom:employee_create' %}" class="btn btn-warning w-100 py-3 text-white"><i class="bi bi-person-badge me-2"></i>Add Employee</a>
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>Quick Actions</h5>
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-3">
+                <a href="{% url 'bloom:order_create' %}" class="btn btn-primary w-100 py-3"><i class="bi bi-plus-circle me-2"></i>New Order</a>
+              </div>
+              <div class="col-md-3">
+                <a href="{% url 'bloom:product_create' %}" class="btn btn-success w-100 py-3"><i class="bi bi-plus-circle me-2"></i>Add Product</a>
+              </div>
+              <div class="col-md-3">
+                <a href="{% url 'bloom:customer_create' %}" class="btn btn-info w-100 py-3 text-white"><i class="bi bi-person-plus me-2"></i>Add Customer</a>
+              </div>
+              <div class="col-md-3">
+                <a href="{% url 'bloom:employee_create' %}" class="btn btn-warning w-100 py-3 text-white"><i class="bi bi-person-badge me-2"></i>Add Employee</a>
+              </div>
             </div>
           </div>
         </div>
