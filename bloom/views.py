@@ -15,6 +15,7 @@ from django.db.models import Q, Sum, Count
 from django.forms import inlineformset_factory
 from django.http import JsonResponse, HttpResponseRedirect
 from django.utils import timezone
+import json
 
 from .models import (
     Customer,
@@ -624,8 +625,12 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         # Get orders by status for the pie chart
         status_counts = (
-            Order.objects.values("status").annotate(count=Sum("id")).order_by()
+            Order.objects.values("status").annotate(count=Count("id")).order_by()
         )
+
+        # Convert QuerySet to list for JSON serialization
+        status_counts_list = list(status_counts)
+        status_counts_json = json.dumps(status_counts_list)
 
         # Get recent orders
         recent_orders = Order.objects.order_by("-created_at")[:10]
@@ -661,7 +666,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 "delivery_orders": Order.objects.filter(status="delivery").count(),
                 "completed_orders": Order.objects.filter(status="completed").count(),
                 "recent_orders": recent_orders,
-                "status_counts": status_counts,
+                "status_counts": status_counts_json,
                 "today": today,
                 "thirty_days_ago": thirty_days_ago,
                 "recent_status_updates": recent_status_updates,
