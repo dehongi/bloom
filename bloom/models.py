@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from accounts.models import CustomUser
+from decimal import Decimal
 
 # Import shop Order model for integration
 # from shop.models import Order as ShopOrder
