@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  Delete Order Work | {{ orderwork.order.reference_number }}
+{% endblock %}
+
+{% block content %}
+  <div class="container-fluid px-4">
+    <h1 class="mt-4">Delete Order Work</h1>
+
+    <div class="mb-4">
+      <a href="{% url 'bloom:orderwork_detail' orderwork.pk %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left"></i> Back to Order Work</a>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-6">
+        <div class="card mb-4">
+          <div class="card-header bg-danger text-white">
+            <i class="fas fa-exclamation-triangle"></i> Confirm Deletion
+          </div>
+          <div class="card-body">
+            <div class="alert alert-warning">
+              <p>
+                <strong>Warning:</strong> You are about to delete the following order work:
+              </p>
+              <ul>
+                <li>
+                  <strong>Order Reference:</strong> {{ orderwork.order.reference_number }}
+                </li>
+                <li>
+                  <strong>Recipient:</strong> {{ orderwork.recipient_name }}
+                </li>
+                <li>
+                  <strong>Shipment Date:</strong> {{ orderwork.shipment_date }}
+                </li>
+                <li>
+                  <strong>Status:</strong> {{ orderwork.get_status_display }}
+                </li>
+              </ul>
+              <p>This action cannot be undone. All associated items and status history will be permanently deleted.</p>
+            </div>
+
+            <form method="post">
+              {% csrf_token %}
+              <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Confirm Delete</button>
+                <a href="{% url 'bloom:orderwork_detail' orderwork.pk %}" class="btn btn-outline-secondary">Cancel</a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card mb-4">
+          <div class="card-header">
+            <i class="fas fa-info-circle"></i> Items to be Deleted
+          </div>
+          <div class="card-body">
+            {% if orderwork.orderitems.exists %}
+              <div class="table-responsive">
+                <table class="table table-sm">
+                  <thead>
+                    <tr>
+                      <th>Item</th>
+                      <th>Quantity</th>
+                      <th>Price</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in orderwork.orderitems.all %}
+                      <tr>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>${{ item.price }}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <p class="text-muted">No items attached to this order work.</p>
+            {% endif %}
+
+            <div class="alert alert-info mt-3">
+              <p>
+                <strong>Suggestion:</strong> Instead of deleting this order work, consider:
+              </p>
+              <ul>
+                <li>Marking it as cancelled if the work is no longer needed</li>
+                <li>Reassigning it to a different employee</li>
+                <li>Updating the information if it's incorrect</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

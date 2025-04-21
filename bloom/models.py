@@ -213,7 +213,7 @@ class DeliveryMethod(models.Model):
 class Order(models.Model):
     STATUS_CHOICES = [
         ("new", "New"),
-        ("design", "Design"),
+        ("processing", "Processing"),
         ("preparation", "Preparation"),
         ("delivery", "Delivery"),
         ("completed", "Completed"),
@@ -224,10 +224,6 @@ class Order(models.Model):
     salesorder_number = models.CharField(max_length=50, blank=True, null=True)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     order_date = models.DateField(default=timezone.now)
-    shipment_date = models.DateField()
-    delivery_method = models.ForeignKey(
-        DeliveryMethod, on_delete=models.SET_NULL, null=True
-    )
 
     # Reference to the corresponding shop order (using string reference)
     shop_order = models.OneToOneField(
@@ -237,43 +233,6 @@ class Order(models.Model):
         blank=True,
         related_name="bloom_order_link",
     )
-
-    shipping_charge = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-
-    # Staff assignments
-    assigned_designer = models.ForeignKey(
-        Employee,
-        related_name="design_orders",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        limit_choices_to={"can_arrange_flowers": True},
-    )
-    assigned_delivery = models.ForeignKey(
-        Employee,
-        related_name="delivery_orders",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        limit_choices_to={"can_deliver_orders": True},
-    )
-    processed_by = models.ForeignKey(
-        Employee,
-        related_name="processed_orders",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        limit_choices_to={"can_process_orders": True},
-    )
-
-    # Address information
-    recipient_name = models.CharField(max_length=100, blank=True)
-    recipient_phone = models.CharField(max_length=20, blank=True)
-    shipping_address = models.TextField()
-    shipping_city = models.CharField(max_length=50)
-    shipping_state = models.CharField(max_length=50)
-    shipping_country = models.CharField(max_length=50)
-    shipping_postal_code = models.CharField(max_length=20)
 
     # Financial information
     subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -294,6 +253,16 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Staff assignments
+    processed_by = models.ForeignKey(
+        Employee,
+        related_name="processed_orders",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        limit_choices_to={"can_process_orders": True},
+    )
+
     class Meta:
         ordering = ["-order_date"]
 
@@ -301,8 +270,8 @@ class Order(models.Model):
         return self.reference_number
 
     def calculate_total(self):
-        # Calculate order total
-        self.subtotal = sum(item.get_total() for item in self.orderitem_set.all())
+        # Calculate order total by summing all OrderWork subtotals
+        self.subtotal = sum(work.subtotal for work in self.orderworks.all())
 
         # Apply discount
         if self.discount_percentage > 0:
@@ -310,15 +279,95 @@ class Order(models.Model):
             self.discount_value = discount_amount
 
         # Calculate total
-        self.total = (
-            self.subtotal - self.discount_value + self.shipping_charge + self.tax_amount
-        )
+        self.total = self.subtotal - self.discount_value + self.tax_amount
 
         return self.total
 
 
+class OrderWork(models.Model):
+    """
+    Represents a specific work within an order - can have different recipients
+    with different delivery information and assigned staff.
+    """
+
+    order = models.ForeignKey(
+        Order, on_delete=models.CASCADE, related_name="orderworks"
+    )
+
+    # Delivery information
+    shipment_date = models.DateField(null=True)
+    delivery_method = models.ForeignKey(
+        DeliveryMethod, on_delete=models.SET_NULL, null=True
+    )
+    shipping_charge = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    # Recipient information
+    recipient_name = models.CharField(max_length=100, blank=True)
+    recipient_phone = models.CharField(max_length=20, blank=True)
+    shipping_address = models.TextField(blank=True, null=True)
+    shipping_city = models.CharField(max_length=50, blank=True, null=True)
+    shipping_state = models.CharField(max_length=50, blank=True, null=True)
+    shipping_country = models.CharField(max_length=50, blank=True, null=True)
+    shipping_postal_code = models.CharField(max_length=20, blank=True, null=True)
+
+    # Staff assignments
+    assigned_designer = models.ForeignKey(
+        Employee,
+        related_name="design_orderworks",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        limit_choices_to={"can_arrange_flowers": True},
+    )
+    assigned_delivery = models.ForeignKey(
+        Employee,
+        related_name="delivery_orderworks",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        limit_choices_to={"can_deliver_orders": True},
+    )
+
+    # Work status and details
+    status = models.CharField(
+        max_length=20, choices=Order.STATUS_CHOICES, default="new"
+    )
+    notes = models.TextField(blank=True)
+
+    # Financial information for this work
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    # Reference to corresponding shop entity (if implemented)
+    shop_orderwork = models.OneToOneField(
+        "shop.OrderWork",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="bloom_orderwork_link",
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Work for {self.order.reference_number} - {self.recipient_name}"
+
+    def calculate_subtotal(self):
+        # Calculate subtotal for this work based on its items
+        self.subtotal = sum(item.get_total() for item in self.orderitems.all())
+        self.save(update_fields=["subtotal"])
+
+        # Update parent order total
+        self.order.calculate_total()
+        self.order.save(update_fields=["subtotal", "total"])
+
+        return self.subtotal
+
+
 class OrderItem(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    orderwork = models.ForeignKey(
+        OrderWork, on_delete=models.CASCADE, related_name="orderitems", null=True
+    )
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE, null=True, blank=True
     )
@@ -330,7 +379,7 @@ class OrderItem(models.Model):
     header_name = models.CharField(max_length=100, blank=True)
 
     def __str__(self):
-        return f"{self.name} - {self.order.reference_number}"
+        return f"{self.name} - {self.orderwork.order.reference_number}"
 
     def get_total(self):
         return self.price * self.quantity
@@ -363,6 +412,26 @@ class OrderStatus(models.Model):
         return f"{self.order.reference_number} - {self.status}"
 
 
+class OrderWorkStatus(models.Model):
+    """Track status changes for OrderWork"""
+
+    orderwork = models.ForeignKey(OrderWork, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=Order.STATUS_CHOICES)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    notes = models.TextField(blank=True)
+    updated_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
+    updated_by_employee = models.ForeignKey(
+        Employee, on_delete=models.SET_NULL, null=True, blank=True
+    )
+
+    class Meta:
+        ordering = ["-timestamp"]
+        verbose_name_plural = "Order Work Statuses"
+
+    def __str__(self):
+        return f"{self.orderwork.order.reference_number} - {self.orderwork.recipient_name} - {self.status}"
+
+
 class EmployeeOrderAssignment(models.Model):
     """Track the history of employee assignments to orders"""
 
@@ -384,6 +453,38 @@ class EmployeeOrderAssignment(models.Model):
     def __str__(self):
         status = "Completed" if self.completed else "Active"
         return f"{self.employee} - {self.order.reference_number} - {self.get_role_display()} ({status})"
+
+    def complete_assignment(self, notes=""):
+        self.completed = True
+        self.completed_at = timezone.now()
+        self.notes = notes
+        self.save()
+
+
+class EmployeeOrderWorkAssignment(models.Model):
+    """Track the history of employee assignments to order works"""
+
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    orderwork = models.ForeignKey(OrderWork, on_delete=models.CASCADE)
+    role = models.CharField(max_length=20, choices=Employee.ROLE_CHOICES)
+    assigned_at = models.DateTimeField(auto_now_add=True)
+    assigned_by = models.ForeignKey(
+        Employee,
+        related_name="made_orderwork_assignments",
+        on_delete=models.SET_NULL,
+        null=True,
+    )
+    completed = models.BooleanField(default=False)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-assigned_at"]
+        unique_together = ("employee", "orderwork", "completed")
+
+    def __str__(self):
+        status = "Completed" if self.completed else "Active"
+        return f"{self.employee} - {self.orderwork.order.reference_number} - {self.get_role_display()} ({status})"
 
     def complete_assignment(self, notes=""):
         self.completed = True

@@ -1,0 +1,306 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}
+  Order Details | {{ order.reference_number }}
+{% endblock %}
+
+{% block content %}
+  <div class="container-fluid px-4">
+    <h1 class="mt-4">
+      Order Details
+      <small class="text-muted">{{ order.reference_number }}</small>
+    </h1>
+
+    <div class="mb-4">
+      <a href="{% url 'bloom:order_list' %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left"></i> Back to Orders</a>
+      <a href="{% url 'bloom:order_update' order.pk %}" class="btn btn-primary"><i class="fas fa-edit"></i> Edit</a>
+      <a href="{% url 'bloom:orderwork_create' order_pk=order.pk %}" class="btn btn-success"><i class="fas fa-plus"></i> Add Work</a>
+      <a href="{% url 'bloom:update_order_status' order.pk %}" class="btn btn-info"><i class="fas fa-sync"></i> Update Status</a>
+      <a href="{% url 'bloom:order_delete' order.pk %}" class="btn btn-danger"><i class="fas fa-trash"></i> Delete</a>
+    </div>
+
+    <div class="row">
+      <!-- Order Info -->
+      <div class="col-lg-6">
+        <div class="card mb-4">
+          <div class="card-header">
+            <i class="fas fa-info-circle"></i> Order Information
+          </div>
+          <div class="card-body">
+            <div class="row mb-2">
+              <div class="col-md-4">
+                <strong>Reference Number:</strong>
+              </div>
+              <div class="col-md-8">{{ order.reference_number }}</div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-md-4">
+                <strong>Sales Order #:</strong>
+              </div>
+              <div class="col-md-8">{{ order.salesorder_number|default:'--' }}</div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-md-4">
+                <strong>Customer:</strong>
+              </div>
+              <div class="col-md-8">
+                <a href="{% url 'bloom:customer_detail' order.customer.pk %}">
+                  {{ order.customer.name }}
+                  {% if order.customer.company_name %}
+                    ({{ order.customer.company_name }})
+                  {% endif %}
+                </a>
+              </div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-md-4">
+                <strong>Order Date:</strong>
+              </div>
+              <div class="col-md-8">{{ order.order_date }}</div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-md-4">
+                <strong>Status:</strong>
+              </div>
+              <div class="col-md-8">
+                <span class="badge bg-{{ order.status|slugify }}">{{ order.get_status_display }}</span>
+              </div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-md-4">
+                <strong>Occasion:</strong>
+              </div>
+              <div class="col-md-8">{{ order.occasion|default:'--' }}</div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-md-4">
+                <strong>Message:</strong>
+              </div>
+              <div class="col-md-8">{{ order.message|default:'--' }}</div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-md-4">
+                <strong>Notes:</strong>
+              </div>
+              <div class="col-md-8">{{ order.notes|default:'--' }}</div>
+            </div>
+            {% if order.shop_order %}
+              <div class="row mb-2">
+                <div class="col-md-4">
+                  <strong>Shop Order:</strong>
+                </div>
+                <div class="col-md-8">{{ order.shop_order.order_number }}</div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Financial Information -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <i class="fas fa-dollar-sign"></i> Financial Information
+          </div>
+          <div class="card-body">
+            <div class="row mb-2">
+              <div class="col-md-4">
+                <strong>Subtotal:</strong>
+              </div>
+              <div class="col-md-8">${{ order.subtotal|floatformat:2|intcomma }}</div>
+            </div>
+            {% if order.discount_value > 0 %}
+              <div class="row mb-2">
+                <div class="col-md-4">
+                  <strong>Discount:</strong>
+                </div>
+                <div class="col-md-8">
+                  {% if order.discount_percentage > 0 %}
+                    {{ order.discount_percentage }}% ({{ order.discount_value|floatformat:2|intcomma }})
+                  {% else %}
+                    ${{ order.discount_value|floatformat:2|intcomma }}
+                  {% endif %}
+                  {% if order.is_discount_before_tax %}
+                    (before tax)
+                  {% else %}
+                    (after tax)
+                  {% endif %}
+                </div>
+              </div>
+            {% endif %}
+            <div class="row mb-2">
+              <div class="col-md-4">
+                <strong>Tax Amount:</strong>
+              </div>
+              <div class="col-md-8">${{ order.tax_amount|floatformat:2|intcomma }}</div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-md-4">
+                <strong>Total:</strong>
+              </div>
+              <div class="col-md-8">${{ order.total|floatformat:2|intcomma }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Custom Fields & Status History -->
+      <div class="col-lg-6">
+        <div class="card mb-4">
+          <div class="card-header">
+            <i class="fas fa-history"></i> Status History
+          </div>
+          <div class="card-body">
+            <form method="post" action="{% url 'bloom:update_order_status' order.pk %}" class="mb-3">
+              {% csrf_token %}
+              <div class="row g-2">
+                <div class="col-md-4">{{ status_form.status }}</div>
+                <div class="col-md-6">{{ status_form.notes }}</div>
+                <div class="col-md-2">
+                  <button type="submit" class="btn btn-primary w-100">Update</button>
+                </div>
+              </div>
+            </form>
+
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Updated By</th>
+                    <th>Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for status in statuses %}
+                    <tr>
+                      <td>{{ status.timestamp|date:'M d, Y H:i' }}</td>
+                      <td>
+                        <span class="badge bg-{{ status.status|slugify }}">{{ status.get_status_display }}</span>
+                      </td>
+                      <td>
+                        {% if status.updated_by_employee %}
+                          {{ status.updated_by_employee }}
+                        {% elif status.updated_by %}
+                          {{ status.updated_by }}
+                        {% else %}
+                          --
+                        {% endif %}
+                      </td>
+                      <td>{{ status.notes|default:'--' }}</td>
+                    </tr>
+                  {% empty %}
+                    <tr>
+                      <td colspan="4">No status history available.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Custom Fields -->
+        <div class="card mb-4">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-list-alt"></i> Custom Fields</span>
+            <a href="{% url 'bloom:custom_field_create' order_pk=order.pk %}" class="btn btn-sm btn-success"><i class="fas fa-plus"></i> Add Field</a>
+          </div>
+          <div class="card-body">
+            {% if custom_fields %}
+              <div class="table-responsive">
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>Field</th>
+                      <th>Value</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for field in custom_fields %}
+                      <tr>
+                        <td>{{ field.field_id }}</td>
+                        <td>{{ field.value }}</td>
+                        <td>
+                          <a href="{% url 'bloom:custom_field_update' field.pk %}" class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></a>
+                          <a href="{% url 'bloom:custom_field_delete' field.pk %}" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></a>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <p>No custom fields have been added.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Works -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <i class="fas fa-tasks"></i> Order Works
+        <a href="{% url 'bloom:orderwork_create' order_pk=order.pk %}" class="btn btn-sm btn-success float-end"><i class="fas fa-plus"></i> Add Work</a>
+      </div>
+      <div class="card-body">
+        {% if orderworks %}
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Recipient</th>
+                  <th>Shipment Date</th>
+                  <th>Address</th>
+                  <th>Status</th>
+                  <th>Designer</th>
+                  <th>Delivery</th>
+                  <th>Subtotal</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for work in orderworks %}
+                  <tr>
+                    <td>{{ work.recipient_name }}</td>
+                    <td>{{ work.shipment_date }}</td>
+                    <td>
+                      {{ work.shipping_address|truncatechars:20 }}<br />
+                      {{ work.shipping_city }}, {{ work.shipping_state }}
+                    </td>
+                    <td>
+                      <span class="badge bg-{{ work.status|slugify }}">{{ work.get_status_display }}</span>
+                    </td>
+                    <td>{{ work.assigned_designer|default:'--' }}</td>
+                    <td>{{ work.assigned_delivery|default:'--' }}</td>
+                    <td>${{ work.subtotal|floatformat:2|intcomma }}</td>
+                    <td>
+                      <a href="{% url 'bloom:orderwork_detail' work.pk %}" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>
+                      <a href="{% url 'bloom:orderwork_update' work.pk %}" class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></a>
+                      <a href="{% url 'bloom:orderwork_delete' work.pk %}" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th colspan="6" class="text-end">Total:</th>
+                  <th>${{ order.subtotal|floatformat:2|intcomma }}</th>
+                  <th></th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        {% else %}
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> No order works have been added to this order yet.
+            <a href="{% url 'bloom:orderwork_create' order_pk=order.pk %}" class="alert-link">Add the first work</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

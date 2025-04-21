@@ -8,6 +8,7 @@ from .models import (
     Cart,
     CartItem,
     Order,
+    OrderWork,
     OrderItem,
     Review,
     Coupon,
@@ -188,37 +189,125 @@ class CartAdmin(admin.ModelAdmin):
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
     extra = 0
-    readonly_fields = (
+    fields = [
         "product",
-        "variant",
         "product_name",
         "variant_name",
         "price",
         "quantity",
         "subtotal",
-    )
+    ]
+    readonly_fields = ["subtotal"]
 
 
+class OrderWorkInline(admin.StackedInline):
+    model = OrderWork
+    extra = 0
+    fields = [
+        "recipient_name",
+        "address_line_1",
+        "address_line_2",
+        "city",
+        "state",
+        "postal_code",
+        "country",
+        "shipping_date",
+        "shipping_method",
+        "shipping_cost",
+        "tracking_number",
+        "status",
+        "subtotal",
+        "notes",
+    ]
+    readonly_fields = ["subtotal"]
+
+
+@admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = (
+    list_display = [
         "order_number",
-        "user",
         "full_name",
+        "email",
         "status",
         "payment_status",
         "total",
         "created_at",
-    )
-    list_filter = ("status", "payment_status")
-    search_fields = ("order_number", "full_name", "email")
-    readonly_fields = ("order_number", "subtotal", "total", "created_at", "updated_at")
-    inlines = [OrderItemInline]
+    ]
+    list_filter = ["status", "payment_status", "created_at"]
+    search_fields = ["order_number", "full_name", "email"]
+    readonly_fields = ["order_number", "created_at", "updated_at", "subtotal", "total"]
+    inlines = [OrderWorkInline, OrderItemInline]
     fieldsets = (
-        ("Customer Info", {"fields": ("user", "full_name", "email", "phone")}),
+        ("Customer Information", {"fields": ("user", "full_name", "email", "phone")}),
         (
-            "Shipping Details",
+            "Order Details",
             {
                 "fields": (
+                    "order_number",
+                    "status",
+                    "payment_status",
+                    "payment_method",
+                    "created_at",
+                    "updated_at",
+                )
+            },
+        ),
+        (
+            "Financial Information",
+            {
+                "fields": (
+                    "subtotal",
+                    "shipping_cost",
+                    "tax_amount",
+                    "coupon",
+                    "discount_amount",
+                    "total",
+                )
+            },
+        ),
+        (
+            "Additional Information",
+            {"fields": ("order_notes", "tracking_number", "ip_address")},
+        ),
+        (
+            "Bloom Integration",
+            {
+                "fields": ("bloom_order",),
+                "classes": ("collapse",),
+            },
+        ),
+    )
+
+
+class OrderWorkItemInline(admin.TabularInline):
+    model = OrderItem
+    extra = 0
+    fields = [
+        "product",
+        "product_name",
+        "variant_name",
+        "price",
+        "quantity",
+        "subtotal",
+    ]
+    readonly_fields = ["subtotal"]
+
+
+@admin.register(OrderWork)
+class OrderWorkAdmin(admin.ModelAdmin):
+    list_display = ["order", "recipient_name", "shipping_date", "status", "subtotal"]
+    list_filter = ["status", "shipping_date"]
+    search_fields = ["order__order_number", "recipient_name", "address_line_1"]
+    readonly_fields = ["subtotal"]
+    inlines = [OrderWorkItemInline]
+    fieldsets = (
+        ("Order Information", {"fields": ("order", "status")}),
+        (
+            "Recipient Information",
+            {
+                "fields": (
+                    "recipient_name",
+                    "recipient_phone",
                     "address_line_1",
                     "address_line_2",
                     "city",
@@ -229,31 +318,23 @@ class OrderAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "Order Details",
+            "Shipping Information",
             {
                 "fields": (
-                    "order_number",
-                    "status",
-                    "payment_status",
+                    "shipping_date",
+                    "shipping_method",
                     "shipping_cost",
-                    "tax_amount",
-                    "coupon",
-                    "discount_amount",
-                    "subtotal",
-                    "total",
+                    "tracking_number",
                 )
             },
         ),
+        ("Financial Information", {"fields": ("subtotal",)}),
+        ("Additional Information", {"fields": ("notes",)}),
         (
-            "Extra Info",
+            "Bloom Integration",
             {
-                "fields": (
-                    "order_notes",
-                    "tracking_number",
-                    "ip_address",
-                    "created_at",
-                    "updated_at",
-                )
+                "fields": ("bloom_orderwork",),
+                "classes": ("collapse",),
             },
         ),
     )
@@ -290,7 +371,6 @@ class CouponUsageAdmin(admin.ModelAdmin):
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Product, ProductAdmin)
 admin.site.register(Cart, CartAdmin)
-admin.site.register(Order, OrderAdmin)
 admin.site.register(Review, ReviewAdmin)
 admin.site.register(Coupon, CouponAdmin)
 admin.site.register(CouponUsage, CouponUsageAdmin)

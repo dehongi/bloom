@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  {{ title }}
+{% endblock %}
+
+{% block content %}
+  <div class="container-fluid px-4">
+    <h1 class="mt-4">{{ title }}</h1>
+
+    <div class="mb-4">
+      <a href="{% url 'bloom:orderwork_detail' orderwork.pk %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left"></i> Back to Order Work</a>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card mb-4">
+          <div class="card-header">
+            <i class="fas fa-shopping-cart"></i> Add Items
+          </div>
+          <div class="card-body">
+            <form method="post" id="itemForm">
+              {% csrf_token %}
+              {{ formset.management_form }}
+
+              <div class="table-responsive">
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th>Name</th>
+                      <th>Description</th>
+                      <th>Price</th>
+                      <th>Quantity</th>
+                      <th>Header (Optional)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for form in formset.forms %}
+                      <tr class="item-form">
+                        <td>
+                          {% for hidden in form.hidden_fields %}
+                            {{ hidden }}
+                          {% endfor %}
+                          {{ form.product }}
+                          {% if form.product.errors %}
+                            <div class="invalid-feedback d-block">{{ form.product.errors }}</div>
+                          {% endif %}
+                        </td>
+                        <td>
+                          {{ form.name }}
+                          {% if form.name.errors %}
+                            <div class="invalid-feedback d-block">{{ form.name.errors }}</div>
+                          {% endif %}
+                        </td>
+                        <td>
+                          {{ form.description }}
+                          {% if form.description.errors %}
+                            <div class="invalid-feedback d-block">{{ form.description.errors }}</div>
+                          {% endif %}
+                        </td>
+                        <td>
+                          {{ form.price }}
+                          {% if form.price.errors %}
+                            <div class="invalid-feedback d-block">{{ form.price.errors }}</div>
+                          {% endif %}
+                        </td>
+                        <td>
+                          {{ form.quantity }}
+                          {% if form.quantity.errors %}
+                            <div class="invalid-feedback d-block">{{ form.quantity.errors }}</div>
+                          {% endif %}
+                        </td>
+                        <td>
+                          {{ form.header_name }}
+                          {% if form.header_name.errors %}
+                            <div class="invalid-feedback d-block">{{ form.header_name.errors }}</div>
+                          {% endif %}
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Save Items</button>
+                <a href="{% url 'bloom:orderwork_detail' orderwork.pk %}" class="btn btn-outline-secondary">Cancel</a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card mb-4">
+          <div class="card-header">
+            <i class="fas fa-info-circle"></i> Help
+          </div>
+          <div class="card-body">
+            <h5>Adding Items to Order Work</h5>
+            <p>Use this form to add items to the order work. You can:</p>
+            <ul>
+              <li>Select an existing product, which will auto-fill name, description, and price</li>
+              <li>Create custom items by entering details manually</li>
+              <li>Use the Header field to group items together (optional)</li>
+            </ul>
+            <p>Items added here will be included in the subtotal for this order work.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra_js %}
+  <script>
+    $(document).ready(function () {
+      // Handle product selection to auto-fill details
+      $('.item-form select[name$="product"]').on('change', function () {
+        const productId = $(this).val()
+        const row = $(this).closest('tr')
+    
+        if (productId) {
+          // Call API to get product details
+          $.ajax({
+            url: '{% url "bloom:get_product_info" %}',
+            data: {
+              product_id: productId
+            },
+            dataType: 'json',
+            success: function (data) {
+              // Fill form fields with product data
+              row.find('input[name$="name"]').val(data.name)
+              row.find('textarea[name$="description"]').val(data.description)
+              row.find('input[name$="price"]').val(data.price)
+            }
+          })
+        }
+      })
+    })
+  </script>
+{% endblock %}

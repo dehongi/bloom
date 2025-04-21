@@ -1,408 +1,440 @@
 {% extends 'bloom/base.html' %}
 {% load static %}
 
-{% block title %}
-  Order #{{ order.reference_number }}
-{% endblock %}
+{% block title %}Order: {{ order.reference_number }}{% endblock %}
 
 {% block bloom_content %}
-  <div class="row mb-4">
-    <div class="col-12">
-      <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3 class="card-title mb-0"><i class="bi bi-bag me-2"></i>Order #{{ order.reference_number }}</h3>
-            <div>
-              <a href="{% url 'bloom:order_update' order.pk %}" class="btn btn-outline-primary me-2"><i class="bi bi-pencil me-1"></i>Edit</a>
-              <button id="update-status-btn" class="btn btn-outline-secondary me-2"><i class="bi bi-arrow-repeat me-1"></i>Update Status</button>
-              <a href="{% url 'bloom:order_delete' order.pk %}" class="btn btn-outline-danger delete-confirm-btn"><i class="bi bi-trash me-1"></i>Delete</a>
-            </div>
-          </div>
-
-          <!-- Status Update Form (hidden by default) -->
-          <div id="status-update-form" class="card mb-3 d-none">
-            <div class="card-body bg-light">
-              <form method="post" action="{% url 'bloom:update_order_status' order.pk %}">
-                {% csrf_token %}
-                <div class="row g-3">
-                  <div class="col-md-4">
-                    <label for="{{ status_form.status.id_for_label }}" class="form-label">New Status</label>
-                    {{ status_form.status }}
-                  </div>
-                  <div class="col-md-6">
-                    <label for="{{ status_form.notes.id_for_label }}" class="form-label">Notes</label>
-                    {{ status_form.notes }}
-                  </div>
-                  <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary w-100">Update</button>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-
-          <!-- Order Information -->
-          <div class="row mb-4">
-            <!-- Order Details -->
-            <div class="col-md-6">
-              <div class="card h-100">
-                <div class="card-header bg-white">
-                  <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Order Details</h5>
-                </div>
-                <div class="card-body">
-                  <div class="row mb-2">
-                    <div class="col-md-4 fw-bold">Status:</div>
-                    <div class="col-md-8">
-                      {# prettier-ignore-start #}
-                      <span class="badge rounded-pill {% if order.status == 'new' %}bg-secondary{% elif order.status == 'design' %}bg-primary{% elif order.status == 'preparation' %}bg-info{% elif order.status == 'delivery' %}bg-warning{% elif order.status == 'completed' %}bg-success{% else %}bg-danger{% endif %}">
-                        {{ order.get_status_display }}
-                      </span>
-                      {# prettier-ignore-end #}
-                    </div>
-                  </div>
-                  <div class="row mb-2">
-                    <div class="col-md-4 fw-bold">Reference #:</div>
-                    <div class="col-md-8">{{ order.reference_number }}</div>
-                  </div>
-                  {% if order.salesorder_number %}
-                    <div class="row mb-2">
-                      <div class="col-md-4 fw-bold">Sales Order #:</div>
-                      <div class="col-md-8">{{ order.salesorder_number }}</div>
-                    </div>
-                  {% endif %}
-                  <div class="row mb-2">
-                    <div class="col-md-4 fw-bold">Order Date:</div>
-                    <div class="col-md-8">{{ order.order_date }}</div>
-                  </div>
-                  <div class="row mb-2">
-                    <div class="col-md-4 fw-bold">Shipment Date:</div>
-                    <div class="col-md-8">{{ order.shipment_date }}</div>
-                  </div>
-                  <div class="row mb-2">
-                    <div class="col-md-4 fw-bold">Customer:</div>
-                    <div class="col-md-8">
-                      <a href="{% url 'bloom:customer_detail' order.customer.pk %}">{{ order.customer.name }}</a>
-                    </div>
-                  </div>
-                  <div class="row mb-2">
-                    <div class="col-md-4 fw-bold">Delivery Method:</div>
-                    <div class="col-md-8">{{ order.delivery_method.name }}</div>
-                  </div>
-                  {% if order.occasion %}
-                    <div class="row mb-2">
-                      <div class="col-md-4 fw-bold">Occasion:</div>
-                      <div class="col-md-8">{{ order.occasion.name }}</div>
-                    </div>
-                  {% endif %}
-                  {% if order.notes %}
-                    <div class="row mb-2">
-                      <div class="col-md-4 fw-bold">Notes:</div>
-                      <div class="col-md-8">{{ order.notes }}</div>
-                    </div>
-                  {% endif %}
-                  {% if order.message %}
-                    <div class="row mb-2">
-                      <div class="col-md-4 fw-bold">Message:</div>
-                      <div class="col-md-8">{{ order.message }}</div>
-                    </div>
-                  {% endif %}
-                </div>
+  <div class="container-fluid">
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h1 class="h3 mb-0">
+                <i class="bi bi-file-earmark-text me-2"></i> Order: {{ order.reference_number }}
+              </h1>
+              <div>
+                <a href="{% url 'bloom:update_order_status' order.pk %}" class="btn btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#statusModal">
+                  <i class="bi bi-arrow-repeat me-1"></i>Update Status
+                </a>
+                <a href="{% url 'bloom:order_update' order.pk %}" class="btn btn-outline-secondary me-2">
+                  <i class="bi bi-pencil me-1"></i>Edit
+                </a>
+                <a href="{% url 'bloom:order_list' %}" class="btn btn-outline-dark">
+                  <i class="bi bi-arrow-left me-1"></i>Back
+                </a>
               </div>
             </div>
 
-            <!-- Shipping Details -->
-            <div class="col-md-6">
-              <div class="card h-100">
-                <div class="card-header bg-white">
-                  <h5 class="mb-0"><i class="bi bi-truck me-2"></i>Shipping Details</h5>
-                </div>
-                <div class="card-body">
-                  {% if order.recipient_name %}
-                    <div class="row mb-2">
-                      <div class="col-md-4 fw-bold">Recipient:</div>
-                      <div class="col-md-8">{{ order.recipient_name }}</div>
-                    </div>
-                  {% endif %}
-                  {% if order.recipient_phone %}
-                    <div class="row mb-2">
-                      <div class="col-md-4 fw-bold">Phone:</div>
-                      <div class="col-md-8">{{ order.recipient_phone }}</div>
-                    </div>
-                  {% endif %}
-                  <div class="row mb-2">
-                    <div class="col-md-4 fw-bold">Address:</div>
-                    <div class="col-md-8">{{ order.shipping_address }}</div>
+            <!-- Order Information -->
+            <div class="row">
+              <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                  <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Order Information</h5>
                   </div>
-                  <div class="row mb-2">
-                    <div class="col-md-4 fw-bold">City:</div>
-                    <div class="col-md-8">{{ order.shipping_city }}</div>
-                  </div>
-                  <div class="row mb-2">
-                    <div class="col-md-4 fw-bold">State/Province:</div>
-                    <div class="col-md-8">{{ order.shipping_state }}</div>
-                  </div>
-                  <div class="row mb-2">
-                    <div class="col-md-4 fw-bold">Country:</div>
-                    <div class="col-md-8">{{ order.shipping_country }}</div>
-                  </div>
-                  <div class="row mb-2">
-                    <div class="col-md-4 fw-bold">Postal Code:</div>
-                    <div class="col-md-8">{{ order.shipping_postal_code }}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Staff Assignments -->
-          <div class="row mb-4">
-            <div class="col-12">
-              <div class="card">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                  <h5 class="mb-0"><i class="bi bi-people me-2"></i>Staff Assignments</h5>
-                  <a href="{% url 'bloom:assign_employee_to_order' order.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-person-plus"></i> Assign Staff</a>
-                </div>
-                <div class="card-body">
-                  <div class="row mb-3">
-                    <!-- Current Assignments -->
-                    <div class="col-md-6">
-                      <h6 class="border-bottom pb-2 mb-3">Current Assignments</h6>
-                      <div class="row mb-2">
-                        <div class="col-md-4 fw-bold">Designer:</div>
-                        <div class="col-md-8">
-                          {% if order.assigned_designer %}
-                            <a href="{% url 'bloom:employee_detail' order.assigned_designer.pk %}">{{ order.assigned_designer.user.get_full_name }}</a>
-                            <span class="badge bg-success ms-1">{{ order.assigned_designer.get_role_display }}</span>
-                          {% else %}
-                            <span class="text-muted">Not assigned</span>
-                          {% endif %}
-                        </div>
-                      </div>
-                      <div class="row mb-2">
-                        <div class="col-md-4 fw-bold">Delivery:</div>
-                        <div class="col-md-8">
-                          {% if order.assigned_delivery %}
-                            <a href="{% url 'bloom:employee_detail' order.assigned_delivery.pk %}">{{ order.assigned_delivery.user.get_full_name }}</a>
-                            <span class="badge bg-warning ms-1">{{ order.assigned_delivery.get_role_display }}</span>
-                          {% else %}
-                            <span class="text-muted">Not assigned</span>
-                          {% endif %}
-                        </div>
-                      </div>
-                      <div class="row mb-2">
-                        <div class="col-md-4 fw-bold">Processed by:</div>
-                        <div class="col-md-8">
-                          {% if order.processed_by %}
-                            <a href="{% url 'bloom:employee_detail' order.processed_by.pk %}">{{ order.processed_by.user.get_full_name }}</a>
-                            <span class="badge bg-info ms-1">{{ order.processed_by.get_role_display }}</span>
-                          {% else %}
-                            <span class="text-muted">Not assigned</span>
-                          {% endif %}
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Assignment History -->
-                    <div class="col-md-6">
-                      <h6 class="border-bottom pb-2 mb-3">Assignment History</h6>
-                      {% if employee_assignments %}
-                        <div class="table-responsive">
-                          <table class="table table-sm">
-                            <thead>
-                              <tr>
-                                <th>Employee</th>
-                                <th>Role</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                                <th>Actions</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {% for assignment in employee_assignments %}
-                                <tr>
-                                  <td>
-                                    <a href="{% url 'bloom:employee_detail' assignment.employee.pk %}">{{ assignment.employee.user.get_full_name }}</a>
-                                  </td>
-                                  <td>{{ assignment.get_role_display }}</td>
-                                  <td>
-                                    {% if assignment.completed %}
-                                      <span class="badge bg-success">Completed</span>
-                                    {% else %}
-                                      <span class="badge bg-warning">Active</span>
-                                    {% endif %}
-                                  </td>
-                                  <td>{{ assignment.assigned_at|date:'M d, Y' }}</td>
-                                  <td>
-                                    {% if not assignment.completed %}
-                                      <form method="post" action="{% url 'bloom:complete_assignment' assignment.pk %}" class="d-inline">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="notes" value="Marked as completed" />
-                                        <button type="submit" class="btn btn-sm btn-success"><i class="bi bi-check-lg"></i></button>
-                                      </form>
-                                    {% endif %}
-                                  </td>
-                                </tr>
-                              {% endfor %}
-                            </tbody>
-                          </table>
-                        </div>
-                      {% else %}
-                        <div class="alert alert-info">No assignment history found</div>
-                      {% endif %}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Order Items -->
-          <div class="card mb-4">
-            <div class="card-header bg-white">
-              <h5 class="mb-0"><i class="bi bi-box-seam me-2"></i>Order Items</h5>
-            </div>
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th>Product</th>
-                      <th>SKU</th>
-                      <th>Description</th>
-                      <th>Price</th>
-                      <th>Quantity</th>
-                      <th>Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for item in items %}
+                  <div class="card-body">
+                    <table class="table table-borderless">
                       <tr>
-                        <td>
-                          {% if item.product %}
-                            <a href="{% url 'bloom:product_detail' item.product.pk %}">{{ item.name }}</a>
-                          {% else %}
-                            {{ item.name }}
-                          {% endif %}
-                        </td>
-                        <td>{{ item.product.sku|default:'N/A' }}</td>
-                        <td>{{ item.description|truncatechars:50 }}</td>
-                        <td>${{ item.price }}</td>
-                        <td>{{ item.quantity }}</td>
-                        <td>${{ item.get_total }}</td>
+                        <th scope="row" style="width: 40%">Reference Number:</th>
+                        <td>{{ order.reference_number }}</td>
                       </tr>
-                    {% empty %}
-                      <tr>
-                        <td colspan="6" class="text-center">No items in this order.</td>
-                      </tr>
-                    {% endfor %}
-                  </tbody>
-                  <tfoot class="table-light">
-                    <tr>
-                      <td colspan="4"></td>
-                      <td class="text-end fw-bold">Subtotal:</td>
-                      <td>${{ order.subtotal }}</td>
-                    </tr>
-                    {% if order.discount_value > 0 %}
-                      <tr>
-                        <td colspan="4"></td>
-                        <td class="text-end fw-bold">Discount ({{ order.discount_percentage }}%):</td>
-                        <td>-${{ order.discount_value }}</td>
-                      </tr>
-                    {% endif %}
-                    {% if order.shipping_charge > 0 %}
-                      <tr>
-                        <td colspan="4"></td>
-                        <td class="text-end fw-bold">Shipping:</td>
-                        <td>${{ order.shipping_charge }}</td>
-                      </tr>
-                    {% endif %}
-                    {% if order.tax_amount > 0 %}
-                      <tr>
-                        <td colspan="4"></td>
-                        <td class="text-end fw-bold">Tax:</td>
-                        <td>${{ order.tax_amount }}</td>
-                      </tr>
-                    {% endif %}
-                    <tr>
-                      <td colspan="4"></td>
-                      <td class="text-end fw-bold fs-5">Total:</td>
-                      <td class="fs-5 fw-bold">${{ order.total }}</td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <!-- Custom Fields -->
-          {% if custom_fields %}
-            <div class="card mb-4">
-              <div class="card-header bg-white">
-                <div class="d-flex justify-content-between align-items-center">
-                  <h5 class="mb-0"><i class="bi bi-sticky me-2"></i>Custom Fields</h5>
-                  <a href="{% url 'bloom:custom_field_create' order.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-plus-circle me-1"></i>Add Field</a>
-                </div>
-              </div>
-              <div class="card-body">
-                <div class="table-responsive">
-                  <table class="table">
-                    <thead>
-                      <tr>
-                        <th>Field ID</th>
-                        <th>Value</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {% for field in custom_fields %}
+                      {% if order.salesorder_number %}
                         <tr>
-                          <td>{{ field.field_id }}</td>
-                          <td>{{ field.value }}</td>
-                          <td>
-                            <div class="btn-group btn-group-sm">
-                              <a href="{% url 'bloom:custom_field_update' field.pk %}" class="btn btn-outline-secondary"><i class="bi bi-pencil"></i></a>
-                              <a href="{% url 'bloom:custom_field_delete' field.pk %}" class="btn btn-outline-danger delete-confirm-btn"><i class="bi bi-trash"></i></a>
-                            </div>
-                          </td>
+                          <th scope="row">Sales Order Number:</th>
+                          <td>{{ order.salesorder_number }}</td>
                         </tr>
-                      {% endfor %}
-                    </tbody>
-                  </table>
+                      {% endif %}
+                      <tr>
+                        <th scope="row">Order Date:</th>
+                        <td>{{ order.order_date|date:"M d, Y" }}</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Status:</th>
+                        <td>
+                          <span class="badge 
+                            {% if order.status == 'new' %}bg-secondary
+                            {% elif order.status == 'processing' %}bg-primary
+                            {% elif order.status == 'preparation' %}bg-info
+                            {% elif order.status == 'delivery' %}bg-warning
+                            {% elif order.status == 'completed' %}bg-success
+                            {% else %}bg-danger{% endif %}">
+                            {{ order.get_status_display }}
+                          </span>
+                        </td>
+                      </tr>
+                      {% if order.processed_by %}
+                        <tr>
+                          <th scope="row">Processed By:</th>
+                          <td>{{ order.processed_by }}</td>
+                        </tr>
+                      {% endif %}
+                      {% if order.occasion %}
+                        <tr>
+                          <th scope="row">Occasion:</th>
+                          <td>{{ order.occasion }}</td>
+                        </tr>
+                      {% endif %}
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                  <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-person me-2"></i>Customer Information</h5>
+                  </div>
+                  <div class="card-body">
+                    <table class="table table-borderless">
+                      <tr>
+                        <th scope="row" style="width: 40%">Customer:</th>
+                        <td>
+                          <a href="{% url 'bloom:customer_detail' order.customer.pk %}">
+                            {{ order.customer }}
+                          </a>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Email:</th>
+                        <td>{{ order.customer.email }}</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Phone:</th>
+                        <td>{{ order.customer.phone }}</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Address:</th>
+                        <td>
+                          {{ order.customer.address }}<br>
+                          {{ order.customer.city }}, {{ order.customer.state }} {{ order.customer.postal_code }}<br>
+                          {{ order.customer.country }}
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                  <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-cash-coin me-2"></i>Order Summary</h5>
+                  </div>
+                  <div class="card-body">
+                    <table class="table table-borderless">
+                      <tr>
+                        <th scope="row" style="width: 40%">Subtotal:</th>
+                        <td>${{ order.subtotal }}</td>
+                      </tr>
+                      {% if order.discount_value > 0 %}
+                        <tr>
+                          <th scope="row">Discount:</th>
+                          <td>${{ order.discount_value }}</td>
+                        </tr>
+                      {% endif %}
+                      {% if order.tax_amount > 0 %}
+                        <tr>
+                          <th scope="row">Tax:</th>
+                          <td>${{ order.tax_amount }}</td>
+                        </tr>
+                      {% endif %}
+                      <tr>
+                        <th scope="row">Total:</th>
+                        <td class="fw-bold">${{ order.total }}</td>
+                      </tr>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
-          {% endif %}
 
-          <!-- Status History -->
-          <div class="card">
-            <div class="card-header bg-white">
-              <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Status History</h5>
-            </div>
-            <div class="card-body">
-              <div class="order-status-timeline">
-                {% for status_entry in status_history %}
-                  <div class="timeline-item">
-                    <h6 class="mb-1">{# prettier-ignore-start #}
-                      <span class="badge rounded-pill 
-                    {% if status_entry.status == 'new' %}bg-secondary{% elif status_entry.status == 'design' %}bg-primary{% elif status_entry.status == 'preparation' %}bg-info{% elif status_entry.status == 'delivery' %}bg-warning{% elif status_entry.status == 'completed' %}bg-success{% else %}bg-danger{% endif %}">
-                        {{ status_entry.get_status_display }}
-                      </span>
-                      {# prettier-ignore-end #}</h6>
-                    <p class="mb-1 small text-muted">{{ status_entry.timestamp }}</p>
-                    {% if status_entry.updated_by %}
-                      <p class="mb-1 small">Updated by: {{ status_entry.updated_by.get_full_name }}</p>
-                    {% endif %}
-                    {% if status_entry.notes %}
-                      <p class="mb-0">{{ status_entry.notes }}</p>
+            <!-- Order Works -->
+            <div class="row">
+              <div class="col-12 mb-4">
+                <div class="card">
+                  <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-truck me-2"></i>Delivery Details</h5>
+                    <a href="{% url 'bloom:orderwork_create' order.pk %}" class="btn btn-sm btn-primary">
+                      <i class="bi bi-plus-circle me-1"></i>Add Delivery
+                    </a>
+                  </div>
+                  <div class="card-body">
+                    {% if order.orderworks.all %}
+                      <div class="accordion" id="orderWorksAccordion">
+                        {% for orderwork in order.orderworks.all %}
+                          <div class="accordion-item mb-3 border">
+                            <h2 class="accordion-header" id="heading-{{ orderwork.id }}">
+                              <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" 
+                                      type="button" 
+                                      data-bs-toggle="collapse" 
+                                      data-bs-target="#collapse-{{ orderwork.id }}" 
+                                      aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" 
+                                      aria-controls="collapse-{{ orderwork.id }}">
+                                <div class="d-flex align-items-center justify-content-between w-100 me-3">
+                                  <div>
+                                    <span class="fw-bold">{{ orderwork.recipient_name }}</span>
+                                    {% if orderwork.shipment_date %}
+                                      <span class="text-muted ms-2">(Delivery: {{ orderwork.shipment_date|date:"M d, Y" }})</span>
+                                    {% endif %}
+                                  </div>
+                                  <div>
+                                    <span class="badge 
+                                      {% if orderwork.status == 'new' %}bg-secondary
+                                      {% elif orderwork.status == 'processing' %}bg-primary
+                                      {% elif orderwork.status == 'preparation' %}bg-info
+                                      {% elif orderwork.status == 'delivery' %}bg-warning
+                                      {% elif orderwork.status == 'completed' %}bg-success
+                                      {% else %}bg-danger{% endif %}">
+                                      {{ orderwork.get_status_display }}
+                                    </span>
+                                  </div>
+                                </div>
+                              </button>
+                            </h2>
+                            <div id="collapse-{{ orderwork.id }}" 
+                                 class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" 
+                                 aria-labelledby="heading-{{ orderwork.id }}" 
+                                 data-bs-parent="#orderWorksAccordion">
+                              <div class="accordion-body">
+                                <div class="row mb-4">
+                                  <div class="col-md-6">
+                                    <h6 class="fw-bold mb-3">Recipient Information</h6>
+                                    <p class="mb-1"><strong>Name:</strong> {{ orderwork.recipient_name }}</p>
+                                    <p class="mb-1"><strong>Phone:</strong> {{ orderwork.recipient_phone }}</p>
+                                    <p class="mb-1"><strong>Address:</strong><br>
+                                      {{ orderwork.shipping_address }}<br>
+                                      {{ orderwork.shipping_city }}, {{ orderwork.shipping_state }} {{ orderwork.shipping_postal_code }}<br>
+                                      {{ orderwork.shipping_country }}
+                                    </p>
+                                  </div>
+                                  <div class="col-md-6">
+                                    <h6 class="fw-bold mb-3">Delivery Information</h6>
+                                    <p class="mb-1"><strong>Delivery Date:</strong> {{ orderwork.shipment_date|date:"M d, Y" }}</p>
+                                    <p class="mb-1"><strong>Delivery Method:</strong> {{ orderwork.delivery_method }}</p>
+                                    <p class="mb-1"><strong>Shipping Charge:</strong> ${{ orderwork.shipping_charge }}</p>
+                                    {% if orderwork.assigned_designer %}
+                                      <p class="mb-1"><strong>Designer:</strong> {{ orderwork.assigned_designer }}</p>
+                                    {% endif %}
+                                    {% if orderwork.assigned_delivery %}
+                                      <p class="mb-1"><strong>Delivery:</strong> {{ orderwork.assigned_delivery }}</p>
+                                    {% endif %}
+                                  </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                  <div class="col-12">
+                                    <h6 class="fw-bold mb-3">Items</h6>
+                                    {% if orderwork.orderitems.all %}
+                                      <div class="table-responsive">
+                                        <table class="table table-sm table-bordered">
+                                          <thead class="table-light">
+                                            <tr>
+                                              <th>Product</th>
+                                              <th>Description</th>
+                                              <th class="text-end">Price</th>
+                                              <th class="text-center">Quantity</th>
+                                              <th class="text-end">Total</th>
+                                            </tr>
+                                          </thead>
+                                          <tbody>
+                                            {% for item in orderwork.orderitems.all %}
+                                              <tr>
+                                                <td>{{ item.name }}</td>
+                                                <td>{{ item.description }}</td>
+                                                <td class="text-end">${{ item.price }}</td>
+                                                <td class="text-center">{{ item.quantity }}</td>
+                                                <td class="text-end">${{ item.get_total }}</td>
+                                              </tr>
+                                            {% endfor %}
+                                          </tbody>
+                                          <tfoot>
+                                            <tr>
+                                              <th colspan="4" class="text-end">Subtotal:</th>
+                                              <th class="text-end">${{ orderwork.subtotal }}</th>
+                                            </tr>
+                                          </tfoot>
+                                        </table>
+                                      </div>
+                                    {% else %}
+                                      <div class="alert alert-warning">
+                                        <i class="bi bi-exclamation-triangle me-2"></i>No items in this delivery.
+                                        <a href="{% url 'bloom:orderwork_add_items' orderwork.pk %}" class="alert-link">Add items</a>.
+                                      </div>
+                                    {% endif %}
+                                  </div>
+                                </div>
+
+                                <div class="row">
+                                  <div class="col-12">
+                                    <div class="d-flex justify-content-end">
+                                      <a href="{% url 'bloom:update_orderwork_status' orderwork.pk %}" class="btn btn-sm btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#statusModal-{{ orderwork.id }}">
+                                        <i class="bi bi-arrow-repeat me-1"></i>Update Status
+                                      </a>
+                                      <a href="{% url 'bloom:orderwork_update' orderwork.pk %}" class="btn btn-sm btn-outline-secondary me-2">
+                                        <i class="bi bi-pencil me-1"></i>Edit
+                                      </a>
+                                      <a href="{% url 'bloom:orderwork_add_items' orderwork.pk %}" class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-box-seam me-1"></i>Manage Items
+                                      </a>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                            
+                          <!-- Status Modal for each OrderWork -->
+                          <div class="modal fade" id="statusModal-{{ orderwork.id }}" tabindex="-1" aria-labelledby="statusModalLabel-{{ orderwork.id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                              <div class="modal-content">
+                                <form method="post" action="{% url 'bloom:update_orderwork_status' orderwork.pk %}">
+                                  {% csrf_token %}
+                                  <div class="modal-header">
+                                    <h5 class="modal-title" id="statusModalLabel-{{ orderwork.id }}">Update Delivery Status</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                  </div>
+                                  <div class="modal-body">
+                                    <div class="mb-3">
+                                      <label for="id_status-{{ orderwork.id }}" class="form-label">Status</label>
+                                      <select name="status" id="id_status-{{ orderwork.id }}" class="form-select">
+                                        {% for value, label in status_choices %}
+                                          <option value="{{ value }}" {% if orderwork.status == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                      </select>
+                                    </div>
+                                    <div class="mb-3">
+                                      <label for="id_notes-{{ orderwork.id }}" class="form-label">Notes</label>
+                                      <textarea name="notes" id="id_notes-{{ orderwork.id }}" rows="3" class="form-control"></textarea>
+                                    </div>
+                                  </div>
+                                  <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Update Status</button>
+                                  </div>
+                                </form>
+                              </div>
+                            </div>
+                          </div>
+                        {% endfor %}
+                      </div>
+                    {% else %}
+                      <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>No delivery details have been added yet.
+                        <a href="{% url 'bloom:orderwork_create' order.pk %}" class="alert-link">Add delivery details</a>.
+                      </div>
                     {% endif %}
                   </div>
-                {% empty %}
-                  <p class="text-center text-muted">No status history available.</p>
-                {% endfor %}
+                </div>
+              </div>
+            </div>
+
+            <!-- Additional Information -->
+            <div class="row">
+              <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                  <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-card-text me-2"></i>Additional Information</h5>
+                  </div>
+                  <div class="card-body">
+                    {% if order.message %}
+                      <h6 class="fw-bold">Message:</h6>
+                      <p class="mb-3">{{ order.message }}</p>
+                    {% endif %}
+                    
+                    {% if order.notes %}
+                      <h6 class="fw-bold">Notes:</h6>
+                      <p class="mb-0">{{ order.notes }}</p>
+                    {% endif %}
+                    
+                    {% if not order.message and not order.notes %}
+                      <p class="text-muted mb-0">No additional information available.</p>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                  <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Status History</h5>
+                  </div>
+                  <div class="card-body">
+                    {% if status_history %}
+                      <div class="table-responsive">
+                        <table class="table table-sm">
+                          <thead>
+                            <tr>
+                              <th>Status</th>
+                              <th>Date/Time</th>
+                              <th>Updated By</th>
+                              <th>Notes</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for status in status_history %}
+                              <tr>
+                                <td>
+                                  <span class="badge 
+                                    {% if status.status == 'new' %}bg-secondary
+                                    {% elif status.status == 'processing' %}bg-primary
+                                    {% elif status.status == 'preparation' %}bg-info
+                                    {% elif status.status == 'delivery' %}bg-warning
+                                    {% elif status.status == 'completed' %}bg-success
+                                    {% else %}bg-danger{% endif %}">
+                                    {{ status.get_status_display }}
+                                  </span>
+                                </td>
+                                <td>{{ status.timestamp|date:"M d, Y H:i" }}</td>
+                                <td>{{ status.updated_by_employee|default:status.updated_by }}</td>
+                                <td>{{ status.notes }}</td>
+                              </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>
+                      </div>
+                    {% else %}
+                      <p class="text-muted mb-0">No status history available.</p>
+                    {% endif %}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status Modal for Order -->
+  <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form method="post" action="{% url 'bloom:update_order_status' order.pk %}">
+          {% csrf_token %}
+          <div class="modal-header">
+            <h5 class="modal-title" id="statusModalLabel">Update Order Status</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="id_status" class="form-label">Status</label>
+              <select name="status" id="id_status" class="form-select">
+                {% for value, label in status_choices %}
+                  <option value="{{ value }}" {% if order.status == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="id_notes" class="form-label">Notes</label>
+              <textarea name="notes" id="id_notes" rows="3" class="form-control"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Update Status</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>

@@ -108,6 +108,126 @@
           </div>
         </div>
 
+        {% if order.works.exists %}
+          <!-- Multiple Delivery Recipients -->
+          <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white">
+              <h3 class="h5 mb-0"><i class="bi bi-people me-2"></i>Delivery Recipients</h3>
+            </div>
+            <div class="card-body p-4">
+              <div class="accordion" id="deliveryAccordion">
+                {% for work in order.works.all %}
+                  <div class="accordion-item border mb-3 rounded">
+                    <h2 class="accordion-header" id="heading{{ work.id }}">
+                      <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#collapse{{ work.id }}"
+                        aria-expanded="{% if forloop.first %}
+                          true
+                        {% else %}
+                          false
+                        {% endif %}"
+                        aria-controls="collapse{{ work.id }}">
+                        <div>
+                          <strong>{{ work.recipient_name|default:'Recipient' }}</strong>
+                          <span class="badge rounded-pill ms-2 
+                          {% if work.status == 'pending' %}
+                              bg-secondary
+                            {% elif work.status == 'processing' %}
+                              bg-primary
+                            {% elif work.status == 'shipped' %}
+                              bg-info
+                            {% elif work.status == 'delivered' %}
+                              bg-success
+                            {% else %}
+                              bg-danger
+                            {% endif %}">
+                            {{ work.get_status_display }}
+                          </span>
+                        </div>
+                      </button>
+                    </h2>
+                    <div id="collapse{{ work.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" aria-labelledby="heading{{ work.id }}" data-bs-parent="#deliveryAccordion">
+                      <div class="accordion-body">
+                        <div class="row">
+                          <div class="col-md-6 mb-3">
+                            <h6>Recipient Information</h6>
+                            <p class="mb-1">{{ work.recipient_name }}</p>
+                            {% if work.recipient_phone %}
+                              <p class="mb-1">Phone: {{ work.recipient_phone }}</p>
+                            {% endif %}
+                            <p class="mb-1">
+                              {% if work.address_line_1 %}
+                                {{ work.address_line_1 }}<br />
+                              {% endif %}
+                              {% if work.address_line_2 %}
+                                {{ work.address_line_2 }}<br />
+                              {% endif %}
+                              {% if work.city %}{{ work.city }}{% endif %}
+                              {% if work.state %}
+                                , {{ work.state }}
+                              {% endif %} {% if work.postal_code %}{{ work.postal_code }}{% endif %}<br />
+                              {% if work.country %}{{ work.country }}{% endif %}
+                            </p>
+                          </div>
+                          <div class="col-md-6 mb-3">
+                            <h6>Delivery Details</h6>
+                            {% if work.shipping_date %}
+                              <p class="mb-1">Delivery Date: {{ work.shipping_date|date:'F j, Y' }}</p>
+                            {% endif %}
+                            {% if work.shipping_method %}
+                              <p class="mb-1">Method: {{ work.shipping_method }}</p>
+                            {% endif %}
+                            {% if work.tracking_number %}
+                              <p class="mb-1">Tracking: {{ work.tracking_number }}</p>
+                            {% endif %}
+                            {% if work.shipping_cost > 0 %}
+                              <p class="mb-1">Shipping Cost: ${{ work.shipping_cost }}</p>
+                            {% endif %}
+                          </div>
+                        </div>
+                        {% if work.items.exists %}
+                          <h6>Items in this delivery:</h6>
+                          <table class="table table-sm">
+                            <thead>
+                              <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th class="text-end">Price</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {% for item in work.items.all %}
+                                <tr>
+                                  <td>
+                                    {{ item.product_name }}
+                                    {% if item.variant_name %}
+                                      <small class="text-muted">- {{ item.variant_name }}</small>
+                                    {% endif %}
+                                  </td>
+                                  <td>{{ item.quantity }}</td>
+                                  <td class="text-end">${{ item.subtotal }}</td>
+                                </tr>
+                              {% endfor %}
+                            </tbody>
+                            <tfoot>
+                              <tr>
+                                <th colspan="2" class="text-end">Subtotal:</th>
+                                <th class="text-end">${{ work.subtotal }}</th>
+                              </tr>
+                            </tfoot>
+                          </table>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        {% endif %}
+
         <!-- Order Items -->
         <div class="card border-0 shadow-sm mb-4">
           <div class="card-header bg-white">

@@ -7,8 +7,9 @@ from django.views.generic import (
     DeleteView,
     View,
     TemplateView,
+    FormView,
 )
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.db.models import Q, Sum, Count
@@ -30,6 +31,9 @@ from .models import (
     OrderStatus,
     Employee,
     EmployeeOrderAssignment,
+    OrderWork,
+    OrderWorkStatus,
+    EmployeeOrderWorkAssignment,
 )
 from .forms import (
     CustomerForm,
@@ -39,16 +43,21 @@ from .forms import (
     ProductForm,
     DeliveryMethodForm,
     OrderForm,
+    OrderWorkForm,
     OrderItemForm,
+    OrderItemFormSet,
     CustomFieldForm,
     OrderStatusForm,
+    OrderWorkStatusForm,
     OrderSearchForm,
     ProductSearchForm,
-    OrderItemFormSet,
     EmployeeForm,
     EmployeeSearchForm,
     EmployeeOrderAssignmentForm,
+    EmployeeOrderWorkAssignmentForm,
 )
+
+from shop.models import Order as ShopOrder
 
 
 # Mixins
@@ -428,21 +437,10 @@ class OrderDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["items"] = OrderItem.objects.filter(order=self.object)
-        context["custom_fields"] = CustomField.objects.filter(order=self.object)
-        context["status_history"] = OrderStatus.objects.filter(order=self.object)
+        context["orderworks"] = self.object.orderworks.all()
+        context["custom_fields"] = self.object.customfield_set.all()
+        context["statuses"] = self.object.orderstatus_set.all().order_by("-timestamp")
         context["status_form"] = OrderStatusForm(initial={"status": self.object.status})
-
-        # Add employee information to context
-        context["designers"] = Employee.objects.filter(can_arrange_flowers=True)
-        context["delivery_staff"] = Employee.objects.filter(can_deliver_orders=True)
-        context["processors"] = Employee.objects.filter(can_process_orders=True)
-
-        # Get assignment history for this order
-        context["employee_assignments"] = EmployeeOrderAssignment.objects.filter(
-            order=self.object
-        ).select_related("employee", "assigned_by")
-
         return context
 
 
@@ -453,56 +451,27 @@ class OrderCreateView(LoginRequiredMixin, StaffRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.request.POST:
-            context["items_formset"] = inlineformset_factory(
-                Order,
-                OrderItem,
-                form=OrderItemForm,
-                formset=OrderItemFormSet,
-                extra=1,
-                can_delete=True,
-            )(self.request.POST)
-        else:
-            context["items_formset"] = inlineformset_factory(
-                Order,
-                OrderItem,
-                form=OrderItemForm,
-                formset=OrderItemFormSet,
-                extra=1,
-                can_delete=True,
-            )()
+        context["title"] = "Create New Order"
         return context
 
     def form_valid(self, form):
-        context = self.get_context_data()
-        items_formset = context["items_formset"]
+        self.object = form.save()
 
-        if items_formset.is_valid():
-            self.object = form.save()
+        # Create initial status record
+        OrderStatus.objects.create(
+            order=self.object,
+            status=self.object.status,
+            updated_by=self.request.user,
+            updated_by_employee=getattr(self.request.user, "employee", None),
+            notes=f"Initial status set to {self.object.get_status_display()}",
+        )
 
-            # Save order items
-            items_formset.instance = self.object
-            items_formset.save()
+        messages.success(
+            self.request, f"Order {self.object.reference_number} created successfully."
+        )
 
-            # Create initial status
-            OrderStatus.objects.create(
-                order=self.object,
-                status=self.object.status,
-                updated_by=self.request.user,
-                notes="Order created",
-            )
-
-            # Calculate and save total
-            self.object.calculate_total()
-            self.object.save()
-
-            messages.success(self.request, "Order created successfully.")
-            return HttpResponseRedirect(self.get_success_url())
-        else:
-            return self.render_to_response(self.get_context_data(form=form))
-
-    def get_success_url(self):
-        return reverse_lazy("bloom:order_detail", kwargs={"pk": self.object.pk})
+        # After order is created, redirect to add work
+        return redirect("bloom:orderwork_create", order_pk=self.object.pk)
 
 
 class OrderUpdateView(LoginRequiredMixin, StaffRequiredMixin, UpdateView):
@@ -512,59 +481,26 @@ class OrderUpdateView(LoginRequiredMixin, StaffRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.request.POST:
-            context["items_formset"] = inlineformset_factory(
-                Order,
-                OrderItem,
-                form=OrderItemForm,
-                formset=OrderItemFormSet,
-                extra=1,
-                can_delete=True,
-            )(self.request.POST, instance=self.object)
-        else:
-            context["items_formset"] = inlineformset_factory(
-                Order,
-                OrderItem,
-                form=OrderItemForm,
-                formset=OrderItemFormSet,
-                extra=1,
-                can_delete=True,
-            )(instance=self.object)
+        context["title"] = f"Edit Order {self.object.reference_number}"
         return context
 
     def form_valid(self, form):
-        context = self.get_context_data()
-        items_formset = context["items_formset"]
+        self.object = form.save()
 
-        if items_formset.is_valid():
-            # Save the order
-            old_status = self.object.status
-            self.object = form.save()
+        # If status has changed, create a new status record
+        if "status" in form.changed_data:
+            OrderStatus.objects.create(
+                order=self.object,
+                status=self.object.status,
+                updated_by=self.request.user,
+                updated_by_employee=getattr(self.request.user, "employee", None),
+                notes=f"Status updated to {self.object.get_status_display()}",
+            )
 
-            # Save order items
-            items_formset.instance = self.object
-            items_formset.save()
-
-            # Create status update if status changed
-            if old_status != self.object.status:
-                OrderStatus.objects.create(
-                    order=self.object,
-                    status=self.object.status,
-                    updated_by=self.request.user,
-                    notes=f"Status changed from {old_status} to {self.object.status}",
-                )
-
-            # Calculate and save total
-            self.object.calculate_total()
-            self.object.save()
-
-            messages.success(self.request, "Order updated successfully.")
-            return HttpResponseRedirect(self.get_success_url())
-        else:
-            return self.render_to_response(self.get_context_data(form=form))
-
-    def get_success_url(self):
-        return reverse_lazy("bloom:order_detail", kwargs={"pk": self.object.pk})
+        messages.success(
+            self.request, f"Order {self.object.reference_number} updated successfully."
+        )
+        return redirect("bloom:order_detail", pk=self.object.pk)
 
 
 class OrderDeleteView(LoginRequiredMixin, StaffRequiredMixin, DeleteView):
@@ -952,3 +888,359 @@ class CompleteAssignmentView(LoginRequiredMixin, StaffRequiredMixin, View):
         )
 
         return redirect("bloom:order_detail", pk=assignment.order.pk)
+
+
+# Order Work Views
+class OrderWorkCreateView(LoginRequiredMixin, StaffRequiredMixin, CreateView):
+    model = OrderWork
+    form_class = OrderWorkForm
+    template_name = "bloom/orderwork_form.html"
+
+    def get_initial(self):
+        initial = super().get_initial()
+        self.order = get_object_or_404(Order, pk=self.kwargs["order_pk"])
+        initial["order"] = self.order
+        return initial
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["order"] = self.order
+        context["title"] = f"Add Work for Order {self.order.reference_number}"
+
+        if self.request.POST:
+            context["orderitems_formset"] = inlineformset_factory(
+                OrderWork,
+                OrderItem,
+                form=OrderItemForm,
+                formset=OrderItemFormSet,
+                extra=1,
+            )(self.request.POST)
+        else:
+            context["orderitems_formset"] = inlineformset_factory(
+                OrderWork,
+                OrderItem,
+                form=OrderItemForm,
+                formset=OrderItemFormSet,
+                extra=1,
+            )()
+
+        return context
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        orderitems_formset = context["orderitems_formset"]
+
+        self.object = form.save(commit=False)
+        self.object.order = self.order
+        self.object.save()
+
+        if orderitems_formset.is_valid():
+            orderitems_formset.instance = self.object
+            orderitems_formset.save()
+
+            # Update the order work subtotal
+            self.object.calculate_subtotal()
+
+            # Create initial status record
+            OrderWorkStatus.objects.create(
+                orderwork=self.object,
+                status=self.object.status,
+                updated_by=self.request.user,
+                updated_by_employee=getattr(self.request.user, "employee", None),
+                notes=f"Initial status set to {self.object.get_status_display()}",
+            )
+
+            messages.success(
+                self.request,
+                f"Work added to order {self.order.reference_number} successfully.",
+            )
+            return redirect(self.get_success_url())
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
+
+    def get_success_url(self):
+        return reverse("bloom:order_detail", kwargs={"pk": self.order.pk})
+
+
+class OrderWorkDetailView(LoginRequiredMixin, DetailView):
+    model = OrderWork
+    template_name = "bloom/orderwork_detail.html"
+    context_object_name = "orderwork"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["order"] = self.object.order
+        context["orderitems"] = self.object.orderitems.all()
+        context["statuses"] = self.object.orderworkstatus_set.all().order_by(
+            "-timestamp"
+        )
+        context["designer_assignments"] = (
+            self.object.employeeorderworkassignment_set.filter(
+                role="designer"
+            ).order_by("-assigned_at")
+        )
+        context["delivery_assignments"] = (
+            self.object.employeeorderworkassignment_set.filter(
+                role="delivery"
+            ).order_by("-assigned_at")
+        )
+
+        # Status form for quick updates
+        context["status_form"] = OrderWorkStatusForm(
+            initial={"status": self.object.status}
+        )
+
+        # Assignment forms
+        context["designer_assignment_form"] = EmployeeOrderWorkAssignmentForm(
+            orderwork=self.object, role="designer", initial={"role": "designer"}
+        )
+        context["delivery_assignment_form"] = EmployeeOrderWorkAssignmentForm(
+            orderwork=self.object, role="delivery", initial={"role": "delivery"}
+        )
+
+        return context
+
+
+class OrderWorkUpdateView(LoginRequiredMixin, StaffRequiredMixin, UpdateView):
+    model = OrderWork
+    form_class = OrderWorkForm
+    template_name = "bloom/orderwork_form.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = f"Edit Work for Order {self.object.order.reference_number}"
+        context["order"] = self.object.order
+
+        if self.request.POST:
+            context["orderitems_formset"] = inlineformset_factory(
+                OrderWork,
+                OrderItem,
+                form=OrderItemForm,
+                formset=OrderItemFormSet,
+                extra=1,
+            )(self.request.POST, instance=self.object)
+        else:
+            context["orderitems_formset"] = inlineformset_factory(
+                OrderWork,
+                OrderItem,
+                form=OrderItemForm,
+                formset=OrderItemFormSet,
+                extra=1,
+            )(instance=self.object)
+
+        return context
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        orderitems_formset = context["orderitems_formset"]
+
+        if orderitems_formset.is_valid():
+            self.object = form.save()
+            orderitems_formset.instance = self.object
+            orderitems_formset.save()
+
+            # Update the work's subtotal
+            self.object.calculate_subtotal()
+
+            # If status changed, create a status record
+            if "status" in form.changed_data:
+                OrderWorkStatus.objects.create(
+                    orderwork=self.object,
+                    status=self.object.status,
+                    updated_by=self.request.user,
+                    updated_by_employee=getattr(self.request.user, "employee", None),
+                    notes=f"Status updated to {self.object.get_status_display()}",
+                )
+
+            messages.success(
+                self.request,
+                f"Work for order {self.object.order.reference_number} updated successfully.",
+            )
+            return redirect(self.get_success_url())
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
+
+    def get_success_url(self):
+        return reverse("bloom:orderwork_detail", kwargs={"pk": self.object.pk})
+
+
+class OrderWorkDeleteView(LoginRequiredMixin, StaffRequiredMixin, DeleteView):
+    model = OrderWork
+    template_name = "bloom/orderwork_confirm_delete.html"
+
+    def get_success_url(self):
+        order_pk = self.object.order.pk
+        return reverse("bloom:order_detail", kwargs={"pk": order_pk})
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        order = self.object.order
+        success_url = self.get_success_url()
+
+        # Delete the work
+        self.object.delete()
+
+        # Recalculate order totals
+        order.calculate_total()
+        order.save()
+
+        messages.success(request, "Work deleted successfully.")
+        return HttpResponseRedirect(success_url)
+
+
+class UpdateOrderWorkStatusView(LoginRequiredMixin, StaffRequiredMixin, FormView):
+    form_class = OrderWorkStatusForm
+    template_name = "bloom/orderwork_status_form.html"
+
+    def get_orderwork(self):
+        return get_object_or_404(OrderWork, pk=self.kwargs["pk"])
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        orderwork = self.get_orderwork()
+        context["orderwork"] = orderwork
+        context["current_status"] = orderwork.status
+        return context
+
+    def form_valid(self, form):
+        orderwork = self.get_orderwork()
+        new_status = form.cleaned_data["status"]
+        notes = form.cleaned_data["notes"]
+
+        # Update the OrderWork status
+        orderwork.status = new_status
+        orderwork.save()
+
+        # Create a status history record
+        OrderWorkStatus.objects.create(
+            orderwork=orderwork,
+            status=new_status,
+            notes=notes,
+            updated_by=self.request.user,
+            updated_by_employee=getattr(self.request.user, "employee", None),
+        )
+
+        messages.success(
+            self.request,
+            f"Status updated to {orderwork.get_status_display()} successfully.",
+        )
+        return redirect("bloom:orderwork_detail", pk=orderwork.pk)
+
+
+class OrderWorkAddItemsView(LoginRequiredMixin, StaffRequiredMixin, View):
+    template_name = "bloom/orderwork_add_items.html"
+
+    def get(self, request, *args, **kwargs):
+        orderwork = get_object_or_404(OrderWork, pk=kwargs["pk"])
+
+        OrderItemFormSet = inlineformset_factory(
+            OrderWork, OrderItem, form=OrderItemForm, extra=3, can_delete=False
+        )
+
+        formset = OrderItemFormSet(instance=orderwork)
+
+        return render(
+            request,
+            self.template_name,
+            {
+                "orderwork": orderwork,
+                "formset": formset,
+                "title": f"Add Items to Work for Order {orderwork.order.reference_number}",
+            },
+        )
+
+    def post(self, request, *args, **kwargs):
+        orderwork = get_object_or_404(OrderWork, pk=kwargs["pk"])
+
+        OrderItemFormSet = inlineformset_factory(
+            OrderWork, OrderItem, form=OrderItemForm, extra=3, can_delete=False
+        )
+
+        formset = OrderItemFormSet(request.POST, instance=orderwork)
+
+        if formset.is_valid():
+            formset.save()
+
+            # Recalculate subtotal and order total
+            orderwork.calculate_subtotal()
+
+            messages.success(request, "Items added successfully.")
+            return redirect("bloom:orderwork_detail", pk=orderwork.pk)
+
+        return render(
+            request,
+            self.template_name,
+            {
+                "orderwork": orderwork,
+                "formset": formset,
+                "title": f"Add Items to Work for Order {orderwork.order.reference_number}",
+            },
+        )
+
+
+class AssignEmployeeToOrderWorkView(LoginRequiredMixin, StaffRequiredMixin, CreateView):
+    model = EmployeeOrderWorkAssignment
+    form_class = EmployeeOrderWorkAssignmentForm
+    template_name = "bloom/employee_assignment_form.html"
+
+    def get_initial(self):
+        initial = super().get_initial()
+        self.orderwork = get_object_or_404(OrderWork, pk=self.kwargs["orderwork_pk"])
+        initial["orderwork"] = self.orderwork
+        initial["role"] = self.request.GET.get("role", "")
+        return initial
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["orderwork"] = self.orderwork
+        kwargs["role"] = self.request.GET.get("role", "")
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["orderwork"] = self.orderwork
+        role_display = dict(Employee.ROLE_CHOICES).get(self.request.GET.get("role", ""))
+        context["title"] = (
+            f"Assign {role_display} to Order Work"
+            if role_display
+            else "Assign Employee to Order Work"
+        )
+        return context
+
+    def form_valid(self, form):
+        form.instance.orderwork = self.orderwork
+        form.instance.assigned_by = getattr(self.request.user, "employee", None)
+
+        # Save the assignment
+        response = super().form_valid(form)
+
+        # If assigning a designer or delivery person, update the orderwork
+        if form.instance.role == "designer":
+            self.orderwork.assigned_designer = form.instance.employee
+            self.orderwork.save()
+        elif form.instance.role == "delivery":
+            self.orderwork.assigned_delivery = form.instance.employee
+            self.orderwork.save()
+
+        messages.success(
+            self.request,
+            f"{form.instance.employee} assigned as {form.instance.get_role_display()} successfully.",
+        )
+        return response
+
+    def get_success_url(self):
+        return reverse("bloom:orderwork_detail", kwargs={"pk": self.orderwork.pk})
+
+
+class CompleteOrderWorkAssignmentView(LoginRequiredMixin, StaffRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        assignment = get_object_or_404(EmployeeOrderWorkAssignment, pk=kwargs["pk"])
+        notes = request.POST.get("notes", "")
+
+        assignment.complete_assignment(notes=notes)
+
+        messages.success(
+            request,
+            f"{assignment.get_role_display()} assignment completed successfully.",
+        )
+        return redirect("bloom:orderwork_detail", pk=assignment.orderwork.pk)

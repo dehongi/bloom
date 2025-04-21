@@ -237,19 +237,12 @@ class Order(models.Model):
         related_name="shop_order_link",
     )
 
-    # Shipping details
-    address_line_1 = models.CharField(max_length=100)
-    address_line_2 = models.CharField(max_length=100, blank=True)
-    city = models.CharField(max_length=50)
-    state = models.CharField(max_length=50)
-    postal_code = models.CharField(max_length=20)
-    country = models.CharField(max_length=50)
-
     # Order details
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     payment_status = models.CharField(
         max_length=20, choices=PAYMENT_STATUS_CHOICES, default="pending"
     )
+    payment_method = models.CharField(max_length=50, blank=True)
     shipping_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     tax_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
@@ -276,27 +269,66 @@ class Order(models.Model):
     def save(self, *args, **kwargs):
         if not self.order_number:
             self.order_number = self._generate_order_number()
-
-        # Calculate the total if not explicitly set
-        if not self.pk:
-            self.total = (
-                self.subtotal
-                + self.shipping_cost
-                + self.tax_amount
-                - self.discount_amount
-            )
-
         super().save(*args, **kwargs)
 
     def _generate_order_number(self):
-        return f"ORD-{uuid.uuid4().hex[:10].upper()}"
+        return f"ORD-{uuid.uuid4().hex[:8].upper()}"
 
     def get_absolute_url(self):
         return reverse("shop:order_detail", kwargs={"order_number": self.order_number})
 
 
+class OrderWork(models.Model):
+    """Represents a specific work unit within an order with separate shipping details"""
+
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="works")
+
+    # Shipping details for this specific work
+    address_line_1 = models.CharField(max_length=100, blank=True, null=True)
+    address_line_2 = models.CharField(max_length=100, blank=True)
+    city = models.CharField(max_length=50, blank=True, null=True)
+    state = models.CharField(max_length=50, blank=True, null=True)
+    postal_code = models.CharField(max_length=20, blank=True, null=True)
+    country = models.CharField(max_length=50, blank=True, null=True)
+    recipient_name = models.CharField(max_length=100, blank=True, null=True)
+    recipient_phone = models.CharField(max_length=20, blank=True)
+
+    # Delivery details
+    shipping_date = models.DateField(null=True)
+    shipping_method = models.CharField(max_length=50, blank=True)
+    shipping_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    tracking_number = models.CharField(max_length=100, blank=True)
+
+    # Status information
+    status = models.CharField(
+        max_length=20, choices=Order.STATUS_CHOICES, default="pending"
+    )
+    subtotal = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, default=0
+    )
+    notes = models.TextField(blank=True)
+
+    # Reference to corresponding bloom orderwork
+    bloom_orderwork = models.OneToOneField(
+        "bloom.OrderWork",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="shop_orderwork_link",
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.order.order_number} - {self.recipient_name}"
+
+
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
+    orderwork = models.ForeignKey(
+        OrderWork, on_delete=models.CASCADE, related_name="items", null=True, blank=True
+    )
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
     variant = models.ForeignKey(
         ProductVariant, on_delete=models.SET_NULL, null=True, blank=True
@@ -308,10 +340,13 @@ class OrderItem(models.Model):
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
+        if self.orderwork:
+            return f"{self.product_name} - {self.orderwork.recipient_name}"
         return f"{self.product_name} - {self.order.order_number}"
 
     def save(self, *args, **kwargs):
-        self.subtotal = self.price * self.quantity
+        if not self.subtotal:
+            self.subtotal = self.price * self.quantity
         super().save(*args, **kwargs)
 
 

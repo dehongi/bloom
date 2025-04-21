@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  Update Order Work Status | {{ orderwork.order.reference_number }}
+{% endblock %}
+
+{% block content %}
+  <div class="container-fluid px-4">
+    <h1 class="mt-4">
+      Update Order Work Status
+      <small class="text-muted">{{ orderwork.order.reference_number }} - {{ orderwork.recipient_name }}</small>
+    </h1>
+
+    <div class="mb-4">
+      <a href="{% url 'bloom:orderwork_detail' orderwork.pk %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left"></i> Back to Order Work</a>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-6">
+        <div class="card mb-4">
+          <div class="card-header">
+            <i class="fas fa-sync"></i> Update Status
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <strong>Current Status:</strong>
+              <span class="badge bg-{{ current_status|slugify }} ms-2">{{ orderwork.get_status_display }}</span>
+            </div>
+
+            <form method="post">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label for="{{ form.status.id_for_label }}" class="form-label">New Status</label>
+                {{ form.status }}
+                {% if form.status.errors %}
+                  <div class="invalid-feedback d-block">{{ form.status.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="mb-3">
+                <label for="{{ form.notes.id_for_label }}" class="form-label">Notes</label>
+                {{ form.notes }}
+                {% if form.notes.errors %}
+                  <div class="invalid-feedback d-block">{{ form.notes.errors }}</div>
+                {% endif %}
+                <div class="form-text">Enter any relevant details about this status change.</div>
+              </div>
+
+              <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Update Status</button>
+                <a href="{% url 'bloom:orderwork_detail' orderwork.pk %}" class="btn btn-outline-secondary">Cancel</a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card mb-4">
+          <div class="card-header">
+            <i class="fas fa-info-circle"></i> Order Work Information
+          </div>
+          <div class="card-body">
+            <div class="row mb-2">
+              <div class="col-md-4">
+                <strong>Recipient:</strong>
+              </div>
+              <div class="col-md-8">{{ orderwork.recipient_name }}</div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-md-4">
+                <strong>Shipment Date:</strong>
+              </div>
+              <div class="col-md-8">{{ orderwork.shipment_date }}</div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-md-4">
+                <strong>Delivery Method:</strong>
+              </div>
+              <div class="col-md-8">{{ orderwork.delivery_method }}</div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-md-4">
+                <strong>Designer:</strong>
+              </div>
+              <div class="col-md-8">{{ orderwork.assigned_designer|default:'Not assigned' }}</div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-md-4">
+                <strong>Delivery:</strong>
+              </div>
+              <div class="col-md-8">{{ orderwork.assigned_delivery|default:'Not assigned' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mb-4">
+          <div class="card-header">
+            <i class="fas fa-history"></i> Status Guidelines
+          </div>
+          <div class="card-body">
+            <ul class="list-group">
+              <li class="list-group-item">
+                <strong class="d-block">New</strong>
+                <small>Just created, not yet in process.</small>
+              </li>
+              <li class="list-group-item">
+                <strong class="d-block">Processing</strong>
+                <small>Order is being prepared, items being gathered.</small>
+              </li>
+              <li class="list-group-item">
+                <strong class="d-block">Preparation</strong>
+                <small>Items are being arranged or prepared for delivery.</small>
+              </li>
+              <li class="list-group-item">
+                <strong class="d-block">Delivery</strong>
+                <small>Order is out for delivery or ready for pickup.</small>
+              </li>
+              <li class="list-group-item">
+                <strong class="d-block">Completed</strong>
+                <small>Order has been delivered and all work is done.</small>
+              </li>
+              <li class="list-group-item">
+                <strong class="d-block">Cancelled</strong>
+                <small>Order was cancelled and will not be completed.</small>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

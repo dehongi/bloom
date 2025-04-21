@@ -3,16 +3,21 @@ from django.contrib import messages
 from django.utils.text import slugify
 from .models import (
     Customer,
+    ContactPerson,
+    CustomerCustomField,
+    Employee,
     Occasion,
     ProductType,
     Product,
     DeliveryMethod,
     Order,
     OrderItem,
+    OrderWork,
     CustomField,
     OrderStatus,
-    Employee,
+    OrderWorkStatus,
     EmployeeOrderAssignment,
+    EmployeeOrderWorkAssignment,
 )
 from shop.models import Product as ShopProduct, Category
 from django.contrib.auth import get_user_model
@@ -23,19 +28,230 @@ from django.utils.html import format_html
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
-    extra = 1
+    extra = 0
+    fields = ["product", "name", "price", "quantity", "get_total"]
+    readonly_fields = ["get_total"]
+
+    def get_total(self, obj):
+        return obj.get_total()
+
+    get_total.short_description = "Total"
+
+
+class OrderWorkInline(admin.StackedInline):
+    model = OrderWork
+    extra = 0
+    fields = [
+        "recipient_name",
+        "recipient_phone",
+        "shipping_address",
+        "shipping_city",
+        "shipping_state",
+        "shipping_country",
+        "shipping_postal_code",
+        "shipment_date",
+        "delivery_method",
+        "shipping_charge",
+        "status",
+        "assigned_designer",
+        "assigned_delivery",
+        "subtotal",
+    ]
+    readonly_fields = ["subtotal"]
 
 
 class CustomFieldInline(admin.TabularInline):
     model = CustomField
-    extra = 1
+    extra = 0
 
 
 class OrderStatusInline(admin.TabularInline):
     model = OrderStatus
     extra = 0
-    readonly_fields = ["timestamp"]
-    can_delete = False
+    fields = ["status", "timestamp", "updated_by", "updated_by_employee", "notes"]
+    readonly_fields = ["timestamp", "updated_by", "updated_by_employee"]
+    ordering = ["-timestamp"]
+
+
+class OrderWorkStatusInline(admin.TabularInline):
+    model = OrderWorkStatus
+    extra = 0
+    fields = ["status", "timestamp", "updated_by", "updated_by_employee", "notes"]
+    readonly_fields = ["timestamp", "updated_by", "updated_by_employee"]
+    ordering = ["-timestamp"]
+
+
+class OrderAdmin(admin.ModelAdmin):
+    list_display = [
+        "reference_number",
+        "customer",
+        "order_date",
+        "status",
+        "total",
+    ]
+    list_filter = ["status", "order_date"]
+    search_fields = [
+        "reference_number",
+        "salesorder_number",
+        "customer__name",
+        "customer__company_name",
+    ]
+    inlines = [OrderWorkInline, CustomFieldInline, OrderStatusInline]
+    fieldsets = (
+        (
+            "Order Information",
+            {
+                "fields": (
+                    "reference_number",
+                    "salesorder_number",
+                    "customer",
+                    "order_date",
+                    "status",
+                )
+            },
+        ),
+        (
+            "Financial Information",
+            {
+                "fields": (
+                    "subtotal",
+                    "discount_type",
+                    "discount_value",
+                    "discount_percentage",
+                    "is_discount_before_tax",
+                    "tax_amount",
+                    "total",
+                )
+            },
+        ),
+        (
+            "Additional Information",
+            {
+                "fields": (
+                    "occasion",
+                    "message",
+                    "notes",
+                    "processed_by",
+                )
+            },
+        ),
+        (
+            "Shop Integration",
+            {
+                "fields": ("shop_order",),
+                "classes": ("collapse",),
+            },
+        ),
+    )
+    readonly_fields = ["subtotal", "total"]
+
+
+class OrderItemAdmin(admin.ModelAdmin):
+    list_display = ["name", "orderwork", "product", "price", "quantity", "get_total"]
+    list_filter = ["orderwork__order__status"]
+    search_fields = ["name", "orderwork__order__reference_number"]
+    autocomplete_fields = ["product", "orderwork"]
+    readonly_fields = ["get_total"]
+
+    def get_total(self, obj):
+        return obj.get_total()
+
+    get_total.short_description = "Total"
+
+
+class OrderWorkItemInline(admin.TabularInline):
+    model = OrderItem
+    extra = 0
+    fields = ["product", "name", "price", "quantity", "get_total"]
+    readonly_fields = ["get_total"]
+
+    def get_total(self, obj):
+        return obj.get_total()
+
+    get_total.short_description = "Total"
+
+
+class EmployeeOrderWorkAssignmentInline(admin.TabularInline):
+    model = EmployeeOrderWorkAssignment
+    extra = 0
+    fields = ["employee", "role", "assigned_at", "assigned_by", "completed"]
+    readonly_fields = ["assigned_at"]
+
+
+class OrderWorkAdmin(admin.ModelAdmin):
+    list_display = ["order", "recipient_name", "shipment_date", "status", "subtotal"]
+    list_filter = ["status", "shipment_date"]
+    search_fields = [
+        "order__reference_number",
+        "recipient_name",
+        "shipping_address",
+    ]
+    inlines = [
+        OrderWorkItemInline,
+        OrderWorkStatusInline,
+        EmployeeOrderWorkAssignmentInline,
+    ]
+    fieldsets = (
+        (
+            "Order Information",
+            {
+                "fields": (
+                    "order",
+                    "status",
+                )
+            },
+        ),
+        (
+            "Recipient Information",
+            {
+                "fields": (
+                    "recipient_name",
+                    "recipient_phone",
+                    "shipping_address",
+                    "shipping_city",
+                    "shipping_state",
+                    "shipping_country",
+                    "shipping_postal_code",
+                )
+            },
+        ),
+        (
+            "Delivery Information",
+            {
+                "fields": (
+                    "shipment_date",
+                    "delivery_method",
+                    "shipping_charge",
+                )
+            },
+        ),
+        (
+            "Staff Assignments",
+            {
+                "fields": (
+                    "assigned_designer",
+                    "assigned_delivery",
+                )
+            },
+        ),
+        (
+            "Financial Information",
+            {"fields": ("subtotal",)},
+        ),
+        (
+            "Additional Information",
+            {"fields": ("notes",)},
+        ),
+        (
+            "Shop Integration",
+            {
+                "fields": ("shop_orderwork",),
+                "classes": ("collapse",),
+            },
+        ),
+    )
+    readonly_fields = ["subtotal"]
+    autocomplete_fields = ["order", "assigned_designer", "assigned_delivery"]
 
 
 @admin.register(Customer)
@@ -231,84 +447,6 @@ class DeliveryMethodAdmin(admin.ModelAdmin):
     search_fields = ("name",)
 
 
-@admin.register(Order)
-class OrderAdmin(admin.ModelAdmin):
-    list_display = (
-        "reference_number",
-        "customer",
-        "order_date",
-        "shipment_date",
-        "status",
-        "total",
-    )
-    list_filter = ("status", "order_date", "shipment_date")
-    search_fields = (
-        "reference_number",
-        "salesorder_number",
-        "customer__name",
-        "shipping_address",
-    )
-    readonly_fields = ("created_at", "updated_at")
-    date_hierarchy = "order_date"
-    inlines = [OrderItemInline, CustomFieldInline, OrderStatusInline]
-    fieldsets = (
-        (
-            "Basic Information",
-            {
-                "fields": (
-                    "reference_number",
-                    "salesorder_number",
-                    "customer",
-                    "order_date",
-                    "shipment_date",
-                    "status",
-                )
-            },
-        ),
-        (
-            "Shipping Information",
-            {
-                "fields": (
-                    "delivery_method",
-                    "shipping_charge",
-                    "recipient_name",
-                    "recipient_phone",
-                    "shipping_address",
-                    "shipping_city",
-                    "shipping_state",
-                    "shipping_country",
-                    "shipping_postal_code",
-                )
-            },
-        ),
-        (
-            "Financial Information",
-            {
-                "fields": (
-                    "subtotal",
-                    "discount_type",
-                    "discount_percentage",
-                    "discount_value",
-                    "is_discount_before_tax",
-                    "tax_amount",
-                    "total",
-                )
-            },
-        ),
-        (
-            "Additional Information",
-            {"fields": ("notes", "occasion", "message", "created_at", "updated_at")},
-        ),
-    )
-
-
-@admin.register(OrderItem)
-class OrderItemAdmin(admin.ModelAdmin):
-    list_display = ("order", "product", "name", "price", "quantity")
-    list_filter = ("order__status",)
-    search_fields = ("order__reference_number", "name")
-
-
 @admin.register(CustomField)
 class CustomFieldAdmin(admin.ModelAdmin):
     list_display = ("order", "field_id", "value")
@@ -416,3 +554,8 @@ class EmployeeOrderAssignmentAdmin(admin.ModelAdmin):
         "notes",
     )
     date_hierarchy = "assigned_at"
+
+
+admin.site.register(Order, OrderAdmin)
+admin.site.register(OrderWork, OrderWorkAdmin)
+admin.site.register(OrderItem, OrderItemAdmin)

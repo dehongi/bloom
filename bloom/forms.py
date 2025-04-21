@@ -7,10 +7,13 @@ from .models import (
     DeliveryMethod,
     Order,
     OrderItem,
+    OrderWork,
     CustomField,
     OrderStatus,
+    OrderWorkStatus,
     Employee,
     EmployeeOrderAssignment,
+    EmployeeOrderWorkAssignment,
     ContactPerson,
 )
 from accounts.models import CustomUser
@@ -108,16 +111,6 @@ class OrderForm(BootstrapModelForm):
             "salesorder_number",
             "customer",
             "order_date",
-            "shipment_date",
-            "delivery_method",
-            "shipping_charge",
-            "recipient_name",
-            "recipient_phone",
-            "shipping_address",
-            "shipping_city",
-            "shipping_state",
-            "shipping_country",
-            "shipping_postal_code",
             "discount_type",
             "discount_percentage",
             "is_discount_before_tax",
@@ -128,18 +121,49 @@ class OrderForm(BootstrapModelForm):
         ]
         widgets = {
             "order_date": forms.DateInput(attrs={"type": "date"}),
+            "notes": forms.Textarea(attrs={"rows": 3}),
+            "message": forms.Textarea(attrs={"rows": 3}),
+        }
+
+
+class OrderWorkForm(BootstrapModelForm):
+    class Meta:
+        model = OrderWork
+        fields = [
+            "shipment_date",
+            "delivery_method",
+            "shipping_charge",
+            "recipient_name",
+            "recipient_phone",
+            "shipping_address",
+            "shipping_city",
+            "shipping_state",
+            "shipping_country",
+            "shipping_postal_code",
+            "notes",
+            "status",
+        ]
+        widgets = {
             "shipment_date": forms.DateInput(attrs={"type": "date"}),
             "shipping_address": forms.Textarea(attrs={"rows": 3}),
             "notes": forms.Textarea(attrs={"rows": 3}),
-            "message": forms.Textarea(attrs={"rows": 3}),
         }
 
     def clean(self):
         cleaned_data = super().clean()
         shipment_date = cleaned_data.get("shipment_date")
-        order_date = cleaned_data.get("order_date")
 
-        if shipment_date and order_date and shipment_date < order_date:
+        # Get order_date from parent order if available
+        order = None
+        if self.instance and self.instance.pk and self.instance.order:
+            order = self.instance.order
+        elif "order" in self.initial:
+            try:
+                order = Order.objects.get(pk=self.initial["order"])
+            except Order.DoesNotExist:
+                pass
+
+        if order and shipment_date and shipment_date < order.order_date:
             self.add_error(
                 "shipment_date", "Shipment date cannot be before order date."
             )
@@ -191,6 +215,19 @@ class CustomFieldForm(BootstrapModelForm):
 class OrderStatusForm(BootstrapModelForm):
     class Meta:
         model = OrderStatus
+        fields = ["status", "notes"]
+        widgets = {
+            "notes": forms.Textarea(attrs={"rows": 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["notes"].required = False
+
+
+class OrderWorkStatusForm(BootstrapModelForm):
+    class Meta:
+        model = OrderWorkStatus
         fields = ["status", "notes"]
         widgets = {
             "notes": forms.Textarea(attrs={"rows": 3}),
@@ -366,7 +403,6 @@ class EmployeeOrderAssignmentForm(BootstrapModelForm):
                 "data-manager-filter": "can_manage_staff",
             }
         )
-    
 
 
 class ContactPersonForm(BootstrapModelForm):
@@ -388,3 +424,36 @@ class ContactPersonForm(BootstrapModelForm):
             {"class": "form-check-input ms-0"}
         )
         self.fields["salutation"].required = False
+
+
+class EmployeeOrderWorkAssignmentForm(BootstrapModelForm):
+    class Meta:
+        model = EmployeeOrderWorkAssignment
+        fields = ["employee", "role", "notes"]
+        widgets = {
+            "notes": forms.Textarea(attrs={"rows": 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        orderwork = kwargs.pop("orderwork", None)
+        role = kwargs.pop("role", None)
+        super().__init__(*args, **kwargs)
+
+        if "role" in self.fields and role:
+            self.fields["role"].initial = role
+            self.fields["role"].widget.attrs["readonly"] = True
+
+        # Filter employees by capability
+        if "employee" in self.fields:
+            if role == "designer":
+                self.fields["employee"].queryset = Employee.objects.filter(
+                    can_arrange_flowers=True, is_active=True
+                )
+            elif role == "delivery":
+                self.fields["employee"].queryset = Employee.objects.filter(
+                    can_deliver_orders=True, is_active=True
+                )
+            else:
+                self.fields["employee"].queryset = Employee.objects.filter(
+                    is_active=True
+                )

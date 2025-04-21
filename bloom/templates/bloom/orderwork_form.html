@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  {% if orderwork %}
+    Edit Order Work
+  {% else %}
+    New Order Work
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+  <div class="container-fluid px-4">
+    <h1 class="mt-4">
+      {% if orderwork %}
+        Edit Order Work
+      {% else %}
+        Add Order Work
+      {% endif %}
+      {% if order %}
+        <small class="text-muted">for Order {{ order.reference_number }}</small>
+      {% endif %}
+    </h1>
+
+    <div class="mb-4">
+      {% if orderwork %}
+        <a href="{% url 'bloom:orderwork_detail' orderwork.pk %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left"></i> Back to Order Work</a>
+      {% else %}
+        <a href="{% url 'bloom:order_detail' order.pk %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left"></i> Back to Order</a>
+      {% endif %}
+    </div>
+
+    <div class="row">
+      <div class="col-lg-8">
+        <div class="card mb-4">
+          <div class="card-header">
+            <i class="fas fa-edit"></i>
+            {% if orderwork %}
+              Edit
+            {% else %}
+              New
+            {% endif %}Order Work
+          </div>
+          <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+              {% csrf_token %}
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="{{ form.shipment_date.id_for_label }}" class="form-label">Shipment Date</label>
+                  {{ form.shipment_date }}
+                  {% if form.shipment_date.errors %}
+                    <div class="invalid-feedback d-block">{{ form.shipment_date.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label for="{{ form.delivery_method.id_for_label }}" class="form-label">Delivery Method</label>
+                  {{ form.delivery_method }}
+                  {% if form.delivery_method.errors %}
+                    <div class="invalid-feedback d-block">{{ form.delivery_method.errors }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="{{ form.recipient_name.id_for_label }}" class="form-label">Recipient Name</label>
+                  {{ form.recipient_name }}
+                  {% if form.recipient_name.errors %}
+                    <div class="invalid-feedback d-block">{{ form.recipient_name.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label for="{{ form.recipient_phone.id_for_label }}" class="form-label">Recipient Phone</label>
+                  {{ form.recipient_phone }}
+                  {% if form.recipient_phone.errors %}
+                    <div class="invalid-feedback d-block">{{ form.recipient_phone.errors }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="{{ form.shipping_address.id_for_label }}" class="form-label">Shipping Address</label>
+                {{ form.shipping_address }}
+                {% if form.shipping_address.errors %}
+                  <div class="invalid-feedback d-block">{{ form.shipping_address.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="{{ form.shipping_city.id_for_label }}" class="form-label">City</label>
+                  {{ form.shipping_city }}
+                  {% if form.shipping_city.errors %}
+                    <div class="invalid-feedback d-block">{{ form.shipping_city.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label for="{{ form.shipping_state.id_for_label }}" class="form-label">State</label>
+                  {{ form.shipping_state }}
+                  {% if form.shipping_state.errors %}
+                    <div class="invalid-feedback d-block">{{ form.shipping_state.errors }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="{{ form.shipping_postal_code.id_for_label }}" class="form-label">Postal Code</label>
+                  {{ form.shipping_postal_code }}
+                  {% if form.shipping_postal_code.errors %}
+                    <div class="invalid-feedback d-block">{{ form.shipping_postal_code.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label for="{{ form.shipping_country.id_for_label }}" class="form-label">Country</label>
+                  {{ form.shipping_country }}
+                  {% if form.shipping_country.errors %}
+                    <div class="invalid-feedback d-block">{{ form.shipping_country.errors }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="{{ form.status.id_for_label }}" class="form-label">Status</label>
+                  {{ form.status }}
+                  {% if form.status.errors %}
+                    <div class="invalid-feedback d-block">{{ form.status.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label for="{{ form.shipping_charge.id_for_label }}" class="form-label">Shipping Charge</label>
+                  {{ form.shipping_charge }}
+                  {% if form.shipping_charge.errors %}
+                    <div class="invalid-feedback d-block">{{ form.shipping_charge.errors }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="{{ form.notes.id_for_label }}" class="form-label">Notes</label>
+                {{ form.notes }}
+                {% if form.notes.errors %}
+                  <div class="invalid-feedback d-block">{{ form.notes.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Save</button>
+                {% if orderwork %}
+                  <a href="{% url 'bloom:orderwork_detail' orderwork.pk %}" class="btn btn-outline-secondary">Cancel</a>
+                {% else %}
+                  <a href="{% url 'bloom:order_detail' order.pk %}" class="btn btn-outline-secondary">Cancel</a>
+                {% endif %}
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        {% if orderwork %}
+          <div class="card mb-4">
+            <div class="card-header">
+              <i class="fas fa-users"></i> Staff Assignments
+            </div>
+            <div class="card-body">
+              <div class="mb-3">
+                <strong>Designer:</strong>
+                {% if orderwork.assigned_designer %}
+                  <div class="mt-2">{{ orderwork.assigned_designer.user.get_full_name }}</div>
+                {% else %}
+                  <div class="mt-2 text-muted">Not assigned</div>
+                {% endif %}
+              </div>
+
+              <div class="mb-3">
+                <strong>Delivery:</strong>
+                {% if orderwork.assigned_delivery %}
+                  <div class="mt-2">{{ orderwork.assigned_delivery.user.get_full_name }}</div>
+                {% else %}
+                  <div class="mt-2 text-muted">Not assigned</div>
+                {% endif %}
+              </div>
+
+              <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> You can assign staff after saving this order work.
+              </div>
+            </div>
+          </div>
+        {% endif %}
+
+        <div class="card mb-4">
+          <div class="card-header">
+            <i class="fas fa-info-circle"></i> Help
+          </div>
+          <div class="card-body">
+            <p>An Order Work represents a specific delivery within an order. Each Order Work can have:</p>
+            <ul>
+              <li>Its own recipient and shipping address</li>
+              <li>Different shipping date and method</li>
+              <li>Separate staff assignments</li>
+              <li>Individual items and tracking</li>
+            </ul>
+            <p>After creating the Order Work, you'll be able to add items and assign staff.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -26,6 +26,13 @@
             {% endif %}Order
           </h3>
 
+          {% if not object %}
+            <div class="alert alert-info mb-4">
+              <i class="bi bi-info-circle me-2"></i>
+              <strong>Note:</strong> You'll be able to add delivery details and items after creating the order.
+            </div>
+          {% endif %}
+
           <form method="post" id="order-form">
             {% csrf_token %}
 
@@ -57,35 +64,14 @@
                       <div class="invalid-feedback d-block">{{ form.customer.errors }}</div>
                     {% endif %}
                   </div>
-                  <div class="col-md-3">
+                  <div class="col-md-6">
                     <label for="{{ form.order_date.id_for_label }}" class="form-label">Order Date*</label>
                     {{ form.order_date }}
                     {% if form.order_date.errors %}
                       <div class="invalid-feedback d-block">{{ form.order_date.errors }}</div>
                     {% endif %}
                   </div>
-                  <div class="col-md-3">
-                    <label for="{{ form.shipment_date.id_for_label }}" class="form-label">Shipment Date*</label>
-                    {{ form.shipment_date }}
-                    {% if form.shipment_date.errors %}
-                      <div class="invalid-feedback d-block">{{ form.shipment_date.errors }}</div>
-                    {% endif %}
-                  </div>
                   <div class="col-md-6">
-                    <label for="{{ form.delivery_method.id_for_label }}" class="form-label">Delivery Method*</label>
-                    {{ form.delivery_method }}
-                    {% if form.delivery_method.errors %}
-                      <div class="invalid-feedback d-block">{{ form.delivery_method.errors }}</div>
-                    {% endif %}
-                  </div>
-                  <div class="col-md-3">
-                    <label for="{{ form.shipping_charge.id_for_label }}" class="form-label">Shipping Charge</label>
-                    {{ form.shipping_charge }}
-                    {% if form.shipping_charge.errors %}
-                      <div class="invalid-feedback d-block">{{ form.shipping_charge.errors }}</div>
-                    {% endif %}
-                  </div>
-                  <div class="col-md-3">
                     <label for="{{ form.occasion.id_for_label }}" class="form-label">Occasion</label>
                     {{ form.occasion }}
                     {% if form.occasion.errors %}
@@ -96,142 +82,92 @@
               </div>
             </div>
 
-            <!-- Shipping Information Section -->
-            <div class="card mb-4">
-              <div class="card-header bg-white">
-                <h5 class="mb-0"><i class="bi bi-truck me-2"></i>Shipping Information</h5>
-              </div>
-              <div class="card-body">
-                <div class="row g-3">
-                  <div class="col-md-6">
-                    <label for="{{ form.recipient_name.id_for_label }}" class="form-label">Recipient Name</label>
-                    {{ form.recipient_name }}
-                    {% if form.recipient_name.errors %}
-                      <div class="invalid-feedback d-block">{{ form.recipient_name.errors }}</div>
-                    {% endif %}
-                  </div>
-                  <div class="col-md-6">
-                    <label for="{{ form.recipient_phone.id_for_label }}" class="form-label">Recipient Phone</label>
-                    {{ form.recipient_phone }}
-                    {% if form.recipient_phone.errors %}
-                      <div class="invalid-feedback d-block">{{ form.recipient_phone.errors }}</div>
-                    {% endif %}
-                  </div>
-                  <div class="col-12">
-                    <label for="{{ form.shipping_address.id_for_label }}" class="form-label">Address*</label>
-                    {{ form.shipping_address }}
-                    {% if form.shipping_address.errors %}
-                      <div class="invalid-feedback d-block">{{ form.shipping_address.errors }}</div>
-                    {% endif %}
-                  </div>
-                  <div class="col-md-6">
-                    <label for="{{ form.shipping_city.id_for_label }}" class="form-label">City*</label>
-                    {{ form.shipping_city }}
-                    {% if form.shipping_city.errors %}
-                      <div class="invalid-feedback d-block">{{ form.shipping_city.errors }}</div>
-                    {% endif %}
-                  </div>
-                  <div class="col-md-6">
-                    <label for="{{ form.shipping_state.id_for_label }}" class="form-label">State/Province*</label>
-                    {{ form.shipping_state }}
-                    {% if form.shipping_state.errors %}
-                      <div class="invalid-feedback d-block">{{ form.shipping_state.errors }}</div>
-                    {% endif %}
-                  </div>
-                  <div class="col-md-6">
-                    <label for="{{ form.shipping_country.id_for_label }}" class="form-label">Country*</label>
-                    {{ form.shipping_country }}
-                    {% if form.shipping_country.errors %}
-                      <div class="invalid-feedback d-block">{{ form.shipping_country.errors }}</div>
-                    {% endif %}
-                  </div>
-                  <div class="col-md-6">
-                    <label for="{{ form.shipping_postal_code.id_for_label }}" class="form-label">Postal Code*</label>
-                    {{ form.shipping_postal_code }}
-                    {% if form.shipping_postal_code.errors %}
-                      <div class="invalid-feedback d-block">{{ form.shipping_postal_code.errors }}</div>
-                    {% endif %}
+            {% if object %}
+              <!-- Order Works Section -->
+              <div class="card mb-4">
+                <div class="card-header bg-white">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-truck me-2"></i>Delivery Details</h5>
+                    <a href="{% url 'bloom:orderwork_create' object.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-plus-circle me-1"></i>Add Delivery</a>
                   </div>
                 </div>
-              </div>
-            </div>
+                <div class="card-body">
+                  {% if object.orderworks.all %}
+                    <div class="table-responsive">
+                      <table class="table table-bordered">
+                        <thead>
+                          <tr>
+                            <th>Recipient</th>
+                            <th>Delivery Date</th>
+                            <th>Status</th>
+                            <th>Items</th>
+                            <th>Subtotal</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for orderwork in object.orderworks.all %}
+                            <tr>
+                              <td>{{ orderwork.recipient_name }}</td>
+                              <td>{{ orderwork.shipment_date|date:'M d, Y' }}</td>
+                              <td>
+                                <span class="badge 
+                                {% if orderwork.status == 'new' %}
+                                    
+                                    bg-secondary
 
-            <!-- Order Items Section -->
-            <div class="card mb-4">
-              <div class="card-header bg-white">
-                <div class="d-flex justify-content-between align-items-center">
-                  <h5 class="mb-0"><i class="bi bi-box-seam me-2"></i>Order Items</h5>
-                  <button id="add-item-btn" class="btn btn-sm btn-outline-primary" data-formset-prefix="orderitem_set"><i class="bi bi-plus-circle me-1"></i>Add Item</button>
-                </div>
-              </div>
-              <div class="card-body">
-                {{ items_formset.management_form }}
-                {% if items_formset.non_form_errors %}
-                  <div class="alert alert-danger">{{ items_formset.non_form_errors }}</div>
-                {% endif %}
 
-                <div class="table-responsive">
-                  <table class="table table-bordered">
-                    <thead>
-                      <tr>
-                        <th style="width: 22%">Product</th>
-                        <th style="width: 20%">Name</th>
-                        <th style="width: 28%">Description</th>
-                        <th style="width: 10%">Price</th>
-                        <th style="width: 10%">Quantity</th>
-                        <th style="width: 10%">Total</th>
-                        <th>Delete</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {% for item_form in items_formset.forms %}
-                        <div class="d-none">{{ item_form.id }}</div>
-                        <tr class="formset-form orderitem_set-form">
-                          <td>
-                            {{ item_form.product }}
-                            {% if item_form.product.errors %}
-                              <div class="invalid-feedback d-block">{{ item_form.product.errors }}</div>
-                            {% endif %}
-                          </td>
-                          <td>
-                            {{ item_form.name }}
-                            {% if item_form.name.errors %}
-                              <div class="invalid-feedback d-block">{{ item_form.name.errors }}</div>
-                            {% endif %}
-                          </td>
-                          <td>
-                            {{ item_form.description }}
-                            {% if item_form.description.errors %}
-                              <div class="invalid-feedback d-block">{{ item_form.description.errors }}</div>
-                            {% endif %}
-                          </td>
-                          <td>
-                            {{ item_form.price }}
-                            {% if item_form.price.errors %}
-                              <div class="invalid-feedback d-block">{{ item_form.price.errors }}</div>
-                            {% endif %}
-                          </td>
-                          <td>
-                            {{ item_form.quantity }}
-                            {% if item_form.quantity.errors %}
-                              <div class="invalid-feedback d-block">{{ item_form.quantity.errors }}</div>
-                            {% endif %}
-                          </td>
-                          <td>
-                            <span class="item-total" data-item-total="0.00">0.00</span>
-                          </td>
-                          <td>
-                            {% if items_formset.can_delete %}
-                              <div class="form-check d-flex justify-content-center">{{ item_form.DELETE }}</div>
-                            {% endif %}
-                          </td>
-                        </tr>
-                      {% endfor %}
-                    </tbody>
-                  </table>
+                                  {% elif orderwork.status == 'processing' %}
+                                    
+                                    bg-primary
+
+
+                                  {% elif orderwork.status == 'preparation' %}
+                                    
+                                    bg-info
+
+
+                                  {% elif orderwork.status == 'delivery' %}
+                                    
+                                    bg-warning
+
+
+                                  {% elif orderwork.status == 'completed' %}
+                                    
+                                    bg-success
+
+
+                                  {% else %}
+                                    
+                                    bg-danger
+
+                                  {% endif %}">
+                                  {{ orderwork.get_status_display }}
+                                </span>
+                              </td>
+                              <td>{{ orderwork.orderitems.count }}</td>
+                              <td>${{ orderwork.subtotal }}</td>
+                              <td>
+                                <div class="btn-group btn-group-sm">
+                                  <a href="{% url 'bloom:orderwork_detail' orderwork.pk %}" class="btn btn-outline-primary"><i class="bi bi-eye"></i></a>
+                                  <a href="{% url 'bloom:orderwork_update' orderwork.pk %}" class="btn btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+                                  <a href="{% url 'bloom:orderwork_add_items' orderwork.pk %}" class="btn btn-outline-success"><i class="bi bi-box-seam"></i></a>
+                                </div>
+                              </td>
+                            </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                  {% else %}
+                    <div class="alert alert-warning">
+                      <i class="bi bi-exclamation-triangle me-2"></i>No delivery details added yet.
+                      <a href="{% url 'bloom:orderwork_create' object.pk %}" class="alert-link">Add delivery details</a>.
+                    </div>
+                  {% endif %}
                 </div>
               </div>
-            </div>
+            {% endif %}
 
             <!-- Additional Information Section -->
             <div class="card mb-4">
@@ -294,48 +230,73 @@
                     {{ form.discount_type }}
                     {{ form.is_discount_before_tax }}</div>
 
-                  <!-- Order Totals -->
-                  <div class="col-md-12 mt-4">
-                    <div class="card bg-light">
-                      <div class="card-body">
-                        <div class="row">
-                          <div class="col-md-8 offset-md-4">
-                            <div class="d-flex justify-content-between mb-2">
-                              <h6 class="fw-bold mb-0">Subtotal:</h6>
-                              <div>
-                                $<span id="subtotal-display">0.00</span>
+                  {% if object %}
+                    <!-- Order Totals -->
+                    <div class="col-md-12 mt-4">
+                      <div class="card bg-light">
+                        <div class="card-body">
+                          <div class="row">
+                            <div class="col-md-8 offset-md-4">
+                              <div class="d-flex justify-content-between mb-2">
+                                <h6 class="fw-bold mb-0">Subtotal:</h6>
+                                <div>${{ object.subtotal }}</div>
                               </div>
-                            </div>
-                            <div class="d-flex justify-content-between mb-2">
-                              <h6 class="fw-bold mb-0">Discount:</h6>
-                              <div>
-                                $<span id="discount-display">0.00</span>
+                              <div class="d-flex justify-content-between mb-2">
+                                <h6 class="fw-bold mb-0">Discount:</h6>
+                                <div>${{ object.discount_value }}</div>
                               </div>
-                            </div>
-                            <div class="d-flex justify-content-between mb-2">
-                              <h6 class="fw-bold mb-0">Shipping:</h6>
-                              <div>
-                                $<span id="shipping-display">0.00</span>
+                              <div class="d-flex justify-content-between mb-2">
+                                <h6 class="fw-bold mb-0">Tax:</h6>
+                                <div>${{ object.tax_amount }}</div>
                               </div>
-                            </div>
-                            <div class="d-flex justify-content-between mb-2">
-                              <h6 class="fw-bold mb-0">Tax:</h6>
-                              <div>
-                                $<span id="tax-display">0.00</span>
-                              </div>
-                            </div>
-                            <hr />
-                            <div class="d-flex justify-content-between">
-                              <h5 class="fw-bold mb-0">Total:</h5>
-                              <div class="fw-bold fs-5">
-                                $<span id="total-display">0.00</span>
+                              <hr />
+                              <div class="d-flex justify-content-between">
+                                <h5 class="fw-bold mb-0">Total:</h5>
+                                <div class="fw-bold fs-5">${{ object.total }}</div>
                               </div>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
+                  {% else %}
+                    <!-- Order Totals for new order -->
+                    <div class="col-md-12 mt-4">
+                      <div class="card bg-light">
+                        <div class="card-body">
+                          <div class="row">
+                            <div class="col-md-8 offset-md-4">
+                              <div class="d-flex justify-content-between mb-2">
+                                <h6 class="fw-bold mb-0">Subtotal:</h6>
+                                <div>
+                                  $<span id="subtotal-display">0.00</span>
+                                </div>
+                              </div>
+                              <div class="d-flex justify-content-between mb-2">
+                                <h6 class="fw-bold mb-0">Discount:</h6>
+                                <div>
+                                  $<span id="discount-display">0.00</span>
+                                </div>
+                              </div>
+                              <div class="d-flex justify-content-between mb-2">
+                                <h6 class="fw-bold mb-0">Tax:</h6>
+                                <div>
+                                  $<span id="tax-display">0.00</span>
+                                </div>
+                              </div>
+                              <hr />
+                              <div class="d-flex justify-content-between">
+                                <h5 class="fw-bold mb-0">Total:</h5>
+                                <div class="fw-bold fs-5">
+                                  $<span id="total-display">0.00</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {% endif %}
                 </div>
               </div>
             </div>

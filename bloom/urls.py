@@ -140,6 +140,37 @@ urlpatterns = [
         views.UpdateOrderStatusView.as_view(),
         name="update_order_status",
     ),
+    # OrderWork URLs
+    path(
+        "orders/<int:order_pk>/works/new/",
+        views.OrderWorkCreateView.as_view(),
+        name="orderwork_create",
+    ),
+    path(
+        "orderworks/<int:pk>/",
+        views.OrderWorkDetailView.as_view(),
+        name="orderwork_detail",
+    ),
+    path(
+        "orderworks/<int:pk>/edit/",
+        views.OrderWorkUpdateView.as_view(),
+        name="orderwork_update",
+    ),
+    path(
+        "orderworks/<int:pk>/delete/",
+        views.OrderWorkDeleteView.as_view(),
+        name="orderwork_delete",
+    ),
+    path(
+        "orderworks/<int:pk>/update-status/",
+        views.UpdateOrderWorkStatusView.as_view(),
+        name="update_orderwork_status",
+    ),
+    path(
+        "orderworks/<int:pk>/add-items/",
+        views.OrderWorkAddItemsView.as_view(),
+        name="orderwork_add_items",
+    ),
     # Order Employee Assignment URLs
     path(
         "orders/<int:order_pk>/assign-employee/",
@@ -150,6 +181,17 @@ urlpatterns = [
         "assignments/<int:pk>/complete/",
         views.CompleteAssignmentView.as_view(),
         name="complete_assignment",
+    ),
+    # OrderWork Employee Assignment URLs
+    path(
+        "orderworks/<int:orderwork_pk>/assign-employee/",
+        views.AssignEmployeeToOrderWorkView.as_view(),
+        name="assign_employee_to_orderwork",
+    ),
+    path(
+        "orderwork-assignments/<int:pk>/complete/",
+        views.CompleteOrderWorkAssignmentView.as_view(),
+        name="complete_orderwork_assignment",
     ),
     # Custom Field URLs
     path(
